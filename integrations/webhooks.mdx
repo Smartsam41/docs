@@ -1,0 +1,212 @@
+---
+title: "Webhooks"
+description: "Subscribe to real-time events from CoreX. Get notified the moment an order ships, inventory changes, or a receiving order closes — no polling required."
+icon: "bell"
+---
+
+**Webhooks** let you subscribe to events in CoreX and receive HTTP POST notifications to your endpoint the moment something happens. Instead of polling the API repeatedly to check for changes, webhooks push the data to you in real time as operations occur in the warehouse.
+
+## How webhooks work
+
+1. You register a webhook subscription with a URL endpoint that you control.
+2. When the subscribed event occurs in CoreX (e.g., an order is shipped), CoreX sends an HTTP POST to your endpoint with the event payload as JSON.
+3. Your endpoint processes the payload and returns a `2xx` HTTP status code to acknowledge receipt.
+4. If your endpoint returns a non-2xx response or times out, CoreX retries the delivery.
+
+## Registering a webhook
+
+### Via the UI
+
+1. Navigate to **Admin → Webhooks** and click **New Webhook**.
+2. Enter your **endpoint URL** (must be HTTPS).
+3. Select the **event types** you want to subscribe to.
+4. Optionally filter by **account** — only send events for a specific shipper account.
+5. Click **Create**. CoreX sends a test event to verify your endpoint is reachable.
+
+### Via the API
+
+```http
+POST /v1/webhooks
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+
+{
+  "url": "https://your-system.com/webhooks/corex",
+  "events": ["order.shipped", "inventory.updated", "receiving_order.closed"],
+  "account_id": "acc_01HFGH3K2M",
+  "secret": "your-webhook-signing-secret"
+}
+```
+
+Response:
+```json
+{
+  "id": "wh_01HG2Z9K4A",
+  "url": "https://your-system.com/webhooks/corex",
+  "events": ["order.shipped", "inventory.updated", "receiving_order.closed"],
+  "status": "active",
+  "created_at": "2026-05-07T15:00:00Z"
+}
+```
+
+## Event types
+
+### Shipping events
+
+| Event | Triggered when |
+|-------|---------------|
+| `order.created` | A new shipping order is created |
+| `order.updated` | A shipping order's status changes |
+| `order.allocated` | Inventory is allocated to an order |
+| `order.waved` | An order is added to a released wave |
+| `order.picked` | All pick tasks for an order are complete |
+| `order.packed` | An order is fully packed and labeled |
+| `order.shipped` | An order is marked as shipped / manifested |
+| `order.cancelled` | An order is cancelled |
+| `order.exception` | An order enters exception status |
+| `tracking.updated` | Carrier tracking status changes |
+| `tracking.delivered` | Package delivered by carrier |
+
+### Receiving events
+
+| Event | Triggered when |
+|-------|---------------|
+| `receiving_order.created` | A new receiving order is created |
+| `receiving_order.started` | Receiving begins on an RO |
+| `receiving_order.closed` | An RO is fully received and closed |
+| `receiving_order.exception` | A discrepancy or exception is flagged |
+
+### Inventory events
+
+| Event | Triggered when |
+|-------|---------------|
+| `inventory.updated` | On-hand quantity changes for any item |
+| `inventory.low` | An item's available quantity drops below a configured threshold |
+| `inventory.adjusted` | A manual inventory adjustment is made |
+| `inventory.lot_expiring` | A lot is approaching its expiration date (configurable lead time) |
+
+### Billing events
+
+| Event | Triggered when |
+|-------|---------------|
+| `invoice.generated` | A new invoice draft is generated |
+| `invoice.finalized` | An invoice is finalized |
+| `invoice.sent` | An invoice is sent to the shipper |
+
+## Webhook payload format
+
+All webhook payloads follow the same structure:
+
+```json
+{
+  "id": "evt_01HG3K8P2X",
+  "event": "order.shipped",
+  "account_id": "acc_01HFGH3K2M",
+  "timestamp": "2026-05-07T16:42:00Z",
+  "data": {
+    "id": "so_01HFXR8A4N",
+    "status": "shipped",
+    "reference": "ORD-98765",
+    "ship_to": {
+      "name": "Jane Smith",
+      "address1": "123 Main St",
+      "city": "Austin",
+      "state": "TX",
+      "zip": "78701"
+    },
+    "cartons": [
+      {
+        "tracking_number": "1Z999AA10123456784",
+        "carrier": "ups",
+        "service": "ground",
+        "weight_lbs": 2.4
+      }
+    ],
+    "shipped_at": "2026-05-07T16:42:00Z"
+  }
+}
+```
+
+## Verifying webhook signatures
+
+To ensure webhook payloads are genuinely from CoreX and haven't been tampered with, every payload is signed with your webhook secret using HMAC-SHA256.
+
+CoreX includes the signature in the `X-CoreX-Signature` header:
+
+```
+X-CoreX-Signature: sha256=abc123def456...
+```
+
+To verify:
+
+```python
+import hmac
+import hashlib
+
+def verify_webhook(payload_body: bytes, signature_header: str, secret: str) -> bool:
+    expected = hmac.new(
+        secret.encode("utf-8"),
+        payload_body,
+        hashlib.sha256
+    ).hexdigest()
+    received = signature_header.replace("sha256=", "")
+    return hmac.compare_digest(expected, received)
+```
+
+```javascript
+const crypto = require("crypto");
+
+function verifyWebhook(payloadBody, signatureHeader, secret) {
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(payloadBody)
+    .digest("hex");
+  const received = signatureHeader.replace("sha256=", "");
+  return crypto.timingSafeEqual(
+    Buffer.from(expected),
+    Buffer.from(received)
+  );
+}
+```
+
+<Warning>
+  Always verify webhook signatures before processing the payload. Without verification, a malicious actor could send fake events to your endpoint.
+</Warning>
+
+## Retry behavior
+
+If your endpoint returns a non-2xx response or doesn't respond within 10 seconds, CoreX marks the delivery as failed and retries:
+
+| Attempt | Delay |
+|---------|-------|
+| 1st retry | 1 minute |
+| 2nd retry | 5 minutes |
+| 3rd retry | 30 minutes |
+| 4th retry | 2 hours |
+| 5th retry | 12 hours |
+
+After 5 failed attempts, the webhook delivery is marked as permanently failed. The event is not retried further.
+
+### Viewing delivery history
+
+Navigate to **Admin → Webhooks** → select a webhook → **Delivery History** tab. See every delivery attempt, response code, response body, and timestamp. You can **manually retry** any failed delivery from this view.
+
+## Best practices
+
+**Respond quickly.** Your endpoint should return a `200 OK` immediately after receiving the payload — even before you finish processing it. Do your processing asynchronously. CoreX gives you 10 seconds before timing out the delivery.
+
+**Idempotent processing.** Webhooks may occasionally be delivered more than once (e.g., if our delivery infrastructure retried after receiving your response but before confirming it). Use the `id` field on each event as an idempotency key — if you've already processed an event with that ID, skip it.
+
+**Handle all event types gracefully.** Subscribe to only the events you need, but make sure your handler doesn't crash on unexpected event types — CoreX may add new event types in the future.
+
+**Monitor your endpoint health.** Set up an alert if your webhook delivery failure rate rises above zero. Persistent failures may indicate a bug in your handler or a network issue.
+
+## Testing webhooks
+
+### Test delivery
+
+From **Admin → Webhooks** → select a webhook → click **Send Test Event**. CoreX sends a sample payload for the selected event type to your endpoint so you can verify parsing and handling.
+
+### Local development
+
+For testing webhooks against a local development server, use a tunneling tool like [ngrok](https://ngrok.com/) or [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) to expose your local server with a public HTTPS URL.

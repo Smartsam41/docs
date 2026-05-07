@@ -1,0 +1,122 @@
+---
+title: "Receiving Orders"
+description: "Create and manage inbound shipment records. Receiving orders are the central document for tracking what's coming in, what arrived, and what discrepancies occurred."
+icon: "clipboard-list"
+---
+
+A **Receiving Order (RO)** is the master document for an inbound shipment in CoreX. Every truck you receive is tracked as a receiving order, giving you a complete record of expected vs. actual quantities, QC results, putaway confirmations, and any discrepancies.
+
+## Viewing receiving orders
+
+Navigate to **Receive → Receiving Orders** to see your list of all active and historical ROs. The list is filterable by:
+
+- **Account** — filter to a specific shipper client
+- **Status** — Draft, Scheduled, In Progress, QC Hold, Received, Closed, Cancelled
+- **Expected Date** — filter by expected arrival date range
+- **Dock Door** — filter by which dock an RO is assigned to
+- **Supplier** — filter by vendor
+
+Click any row to open the RO detail page, which shows line items, scan history, QC results, putaway status, and all attached documents.
+
+## Creating a receiving order
+
+Click **New Receiving Order** from the list view. Fill in the following fields:
+
+<AccordionGroup>
+  <Accordion title="Account">
+    Select the shipper account this inbound shipment belongs to. All inventory received under this RO will be attributed to the selected account.
+  </Accordion>
+  <Accordion title="Supplier">
+    Optionally select the supplier or vendor shipping the goods. Suppliers are maintained under **Customers → Suppliers**. Linking a supplier enables supplier scorecards and discrepancy reporting by vendor.
+  </Accordion>
+  <Accordion title="Reference Numbers">
+    Enter the **PO Number**, **ASN Number**, or any external reference number your shipper uses to identify this shipment. These are searchable and appear on the RO detail and in the Seller Portal.
+  </Accordion>
+  <Accordion title="Expected Arrival Date">
+    Set the date the shipment is expected to arrive. This is used for dock scheduling and for reporting on on-time arrivals.
+  </Accordion>
+  <Accordion title="Inbound Type">
+    Select the inbound shipment type (e.g., Standard PO, Transfer, Return, Cross-Dock). Inbound types are configurable under **Admin → Inbound/Outbound Types** and can carry different default workflows and billing rules.
+  </Accordion>
+  <Accordion title="Line Items">
+    Add the expected SKUs and quantities. You can:
+    - Search for items by SKU, barcode, or description
+    - Enter expected quantity in the configured unit of measure (each, case, pallet)
+    - Optionally enter a lot number or expiration date if the item is lot-tracked
+    - Add per-line notes or special handling instructions
+
+    If you're creating the RO from an imported PO or EDI 856 ASN, the line items will pre-populate automatically.
+  </Accordion>
+  <Accordion title="Notes and Instructions">
+    Add any special receiving instructions that should be visible to the receiving team. Notes appear on the dock terminal view during scan-to-receive.
+  </Accordion>
+</AccordionGroup>
+
+Click **Save** to create the RO in **Draft** status.
+
+## Importing from a Purchase Order
+
+If you've imported a Purchase Order (PO) into CoreX (manually or via EDI), you can create a receiving order directly from it:
+
+1. Navigate to **Receive → Purchase Orders** and find the open PO.
+2. Click **Create Receiving Order** from the PO detail page.
+3. CoreX pre-fills the account, supplier, and expected line items from the PO.
+4. Adjust quantities if needed (e.g., partial shipments) and save.
+
+You can link multiple receiving orders to a single PO to track partial receipts against a total order quantity.
+
+## Managing line items
+
+From the RO detail page, you can add, edit, or remove line items at any time before receiving begins. Once receiving starts (status moves to **In Progress**), line items cannot be deleted — only adjusted.
+
+### Over/under receiving thresholds
+
+Each line item can have an **overage tolerance** and **shortage tolerance** configured. When the received quantity exceeds the tolerance, CoreX flags it as a discrepancy. Default tolerances can be set globally in **Admin → System Parameters** and overridden per account or per line.
+
+## Scheduling a dock appointment
+
+From any RO in Draft or Scheduled status, click **Schedule Appointment** to open the dock scheduling calendar. Select:
+
+- **Dock door** — which physical dock door the truck will use
+- **Date and time** — the appointment slot
+- **Appointment type** — LTL, FTL, parcel, etc. (controls how long the slot is blocked)
+
+Once scheduled, the RO moves to **Scheduled** status and the appointment appears in the **Dock Scheduler** and **Yard Calendar** views.
+
+<Tip>
+  You can also create appointments first in **Receive → Appointments** and then link an RO to the appointment later — useful when you know a truck is coming but the PO details aren't confirmed yet.
+</Tip>
+
+## Starting receiving
+
+When the truck arrives:
+
+1. Open the RO from the list or from the dock terminal.
+2. Click **Start Receiving**. The RO moves to **In Progress**.
+3. Your receiver can now scan product using the **Scan to Receive** mobile flow.
+
+The RO detail page updates in real time as scans come in, showing received quantities vs. expected for each line.
+
+## Closing a receiving order
+
+An RO can be closed manually by a supervisor once all expected receiving is complete — even if some lines show discrepancies. To close:
+
+1. Open the RO and click **Close RO**.
+2. Confirm any outstanding discrepancies (shortages, overages, QC failures).
+3. The RO moves to **Closed** status. Inventory counts are finalized.
+
+<Warning>
+  Closing an RO is a significant action. Quantities are locked and inventory transactions are finalized. If you close an RO early (with unreceived lines), the outstanding quantities will show as shortages in discrepancy reports. Ensure you've reviewed all lines before closing.
+</Warning>
+
+## Attachments and documents
+
+From the RO detail page, use the **Documents** tab to attach:
+
+- Bill of Lading (BOL)
+- Packing slips
+- Proof of delivery photos
+- Supplier invoices
+- QC inspection reports
+
+Attachments are visible to shipper accounts through the Seller Portal if the **Share with Shipper** toggle is enabled on the attachment.

@@ -1,0 +1,155 @@
+---
+title: "Labels & Rates"
+description: "Connect carrier accounts, configure rate shopping rules, generate carrier labels, and manage label reprints and voids."
+icon: "tag"
+---
+
+CoreX has a built-in multi-carrier rating and labeling engine. Connect your carrier accounts once, configure your rules, and CoreX handles rate shopping, label generation, and tracking number management automatically at the pack station — no third-party shipping software required.
+
+## Supported carriers
+
+CoreX supports direct API integration with major carriers. Navigate to **Admin → Carriers** to connect your accounts.
+
+<AccordionGroup>
+  <Accordion title="Small Parcel">
+    - UPS (domestic and international)
+    - FedEx (domestic and international)
+    - USPS (via Stamps.com, EasyPost, or direct Pitney Bowes)
+    - DHL Express
+    - OnTrac
+    - LSO
+    - LaserShip / Veho
+    - OSM Worldwide
+    - Maergo
+  </Accordion>
+  <Accordion title="LTL / Freight">
+    - XPO Logistics
+    - Old Dominion (ODFL)
+    - Estes Express
+    - Saia
+    - ABF Freight
+    - R+L Carriers
+    - FedEx Freight
+    - UPS Freight
+  </Accordion>
+  <Accordion title="Regional & Other">
+    - Amazon Shipping
+    - Flexport
+    - ShipBob Carrier Network
+    - Custom carrier via generic label template
+  </Accordion>
+</AccordionGroup>
+
+## Adding a carrier account
+
+1. Navigate to **Admin → Carriers**.
+2. Click **Add Carrier** and select the carrier from the list.
+3. Enter your carrier account credentials (account number, meter number, API key, contract number — varies by carrier).
+4. Click **Test Connection**. CoreX validates your credentials with the carrier's API.
+5. Once validated, configure:
+   - **Account nickname** — shown internally (e.g., "FedEx - Main Account")
+   - **Default billing type** — shipper, recipient, or third-party
+   - **Available services** — check which service levels to enable (Ground, Express, etc.)
+   - **Markup** — apply a percentage or flat-fee markup on carrier rates if billing pass-through to shippers
+
+<Tip>
+  You can connect multiple accounts per carrier — for example, separate FedEx accounts for different shipper clients. Assign carrier accounts to specific shipper accounts via **Admin → Carrier Rules**.
+</Tip>
+
+## Rate shopping
+
+**Rate shopping** compares rates across all eligible carriers and services for a shipment and selects the best option. CoreX performs rate shopping automatically at pack time, or you can manually rate-shop from the order detail page before packing.
+
+### How rate shopping works
+
+1. CoreX gathers the shipment details: ship-from address, ship-to address, package weight, dimensions, and any special services (signature, insurance, hazmat).
+2. It calls the rating API for each eligible carrier account simultaneously.
+3. Rates are filtered against your **Carrier Rules** (account restrictions, service limits, excluded zones, weight limits).
+4. The eligible rates are sorted by your **selection criterion**:
+   - **Cheapest** — select the lowest rate
+   - **Fastest within budget** — cheapest option that delivers within the promised transit time
+   - **Preferred carrier first** — use a preferred carrier if its rate is within X% of the cheapest
+5. The selected rate is displayed at the pack station and the label is generated.
+
+### Carrier rules
+
+Navigate to **Admin → Carrier Rules** to configure which carriers and services are available for each shipper account, and under what conditions.
+
+Each rule specifies:
+- **Account** — which shipper account this rule applies to
+- **Carrier(s)** — included or excluded carriers
+- **Service levels** — included or excluded services
+- **Conditions** — weight range, zone, ship-to state, order value threshold, etc.
+- **Priority** — rule evaluation order when multiple rules match
+
+Example rules:
+- "For Account ACME, only use FedEx or UPS. No USPS."
+- "For Account BETA, for shipments over 50 lbs, use LTL carriers only."
+- "For all accounts, exclude Next Day Air for destination Zone 1 (home state) — Ground delivers same-day anyway."
+
+### Smart Routing
+
+**Smart Routing** is CoreX's advanced carrier selection engine that incorporates carrier performance data alongside cost. Enable it in **Admin → Smart Routing**.
+
+Smart Routing factors in:
+- Historical on-time delivery rate per carrier × service × destination zone
+- Claims rate (lost/damaged packages) per carrier
+- Cost
+- Transit time
+
+It assigns a score to each carrier option and selects the best overall option, not just the cheapest.
+
+## Generating a carrier label
+
+Labels are generated automatically during the Scan to Pack workflow. The label is sent to the configured printer for the pack station immediately after the carton is weighed and the rate is selected.
+
+### Label formats
+
+CoreX generates industry-standard label formats:
+- **4×6 inch thermal** (ZPL or EPL) — for Zebra and compatible thermal printers
+- **4×6 inch PDF** — for laser or inkjet printers
+- **8.5×11 combined label + packing slip** — label on the top half, packing slip on the bottom
+
+Configure the default format per pack station in **Admin → Warehouse Terminals**.
+
+### Printer setup
+
+CoreX connects to label printers via:
+- **Network (IP-based)** — recommended. Enter the printer's IP address in the terminal configuration.
+- **USB/local** — for printers connected directly to a terminal device.
+- **Zebra ZPL cloud** — for Zebra-managed cloud-connected printers.
+
+Test printer connections from **Admin → Warehouse Terminals → Printers**.
+
+## Voiding labels
+
+To void a label (cancel the shipment with the carrier):
+
+1. Open the order → **Labels** tab.
+2. Find the label and click **Void**.
+3. Confirm the void. CoreX sends a void request to the carrier's API (within the carrier's allowed void window, typically same-day).
+
+Voided labels cannot be used. Reprint or generate a new label if needed.
+
+<Warning>
+  Not all carriers support API voiding. For carriers without API void support, you must void labels manually through the carrier's website or customer service. CoreX will mark the label as voided in the system but the carrier may still charge for the label if it was already scanned.
+</Warning>
+
+## Tracking
+
+Tracking status is updated automatically for all shipments with generated labels. CoreX polls carrier tracking APIs on a schedule and updates the order's tracking status.
+
+View tracking from:
+- **Ship → Shipping Orders** → order detail → **Tracking** tab
+- **Ship → Tracking** — global tracking list, filterable by carrier, status, and date
+- **Seller Portal** — shipper clients can view tracking for their orders without contacting you
+
+Tracking milestones (In Transit, Out for Delivery, Delivered, Exception) trigger status updates and can trigger webhook events to connected systems.
+
+### Delivery exceptions
+
+When a carrier reports a delivery exception (address not found, package refused, weather delay), CoreX flags the order with a **Tracking Exception**. Exceptions appear in the **Ship Out Dashboard** and in **Admin → Exceptions**.
+
+## Rate history
+
+Go to **Reports → Carrier Quote History** to see all rated shipments, the rates offered per carrier, the selected rate, and the actual billed rate (if carrier invoice audit is enabled). Use this data to audit carrier billing and identify negotiation opportunities.

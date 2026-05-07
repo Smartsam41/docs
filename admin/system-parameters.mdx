@@ -1,0 +1,156 @@
+---
+title: "System Parameters"
+description: "Global operational settings that control CoreX's behavior across the entire warehouse — units of measure, tolerances, defaults, and operational flags."
+icon: "sliders"
+---
+
+**System Parameters** are the global configuration knobs for your CoreX instance. These settings define default behaviors, thresholds, and operational rules that apply warehouse-wide unless overridden at the account or item level. Most of these settings need to be configured once during setup and then rarely changed.
+
+Navigate to **Admin → System Parameters** to access all settings. Parameters are organized into sections.
+
+## General
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| **Warehouse name** | Your warehouse's display name (shown in the UI and on documents) | — |
+| **Time zone** | Warehouse operating time zone. Used for all timestamps, cutoff times, and reports. | UTC |
+| **Date format** | MM/DD/YYYY or DD/MM/YYYY | MM/DD/YYYY |
+| **Unit of measure** | Imperial (lbs, inches, feet) or Metric (kg, cm, meters) | Imperial |
+| **Currency** | Default billing currency | USD |
+| **Fiscal year start** | Month your fiscal year begins (for annual reports) | January |
+
+<Warning>
+  Changing the time zone after go-live will shift all historical timestamps in the UI. If you need to change the time zone, do it before your first live operations or in coordination with your CoreX support contact.
+</Warning>
+
+## Receiving
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| **Default overage tolerance** | Maximum overage % before flagging a discrepancy | 5% |
+| **Default shortage tolerance** | Maximum shortage % before flagging a discrepancy | 0% |
+| **Allow ad-hoc receiving** | Whether operators can receive without a pre-existing RO | Yes |
+| **Auto-close RO on full receipt** | Automatically close an RO when all lines reach expected quantity | Yes |
+| **Require QC sign-off before putaway** | Block putaway until QC is approved (when QC is required) | Yes |
+| **Default receiving mode** | Guided, Free-Scan, or Blind Receive | Guided |
+| **Pallet label format** | Label format for auto-generated pallet labels | 4x6 ZPL |
+| **Default inbound type** | Default inbound type when creating a manual RO | Standard PO |
+
+## Shipping / Fulfillment
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| **Auto-allocate on order save** | Automatically allocate inventory when a shipping order is created | Yes |
+| **Release wave on creation** | Automatically release a wave as soon as it's created | No |
+| **Default wave size (orders)** | Default maximum orders per wave for manual wave creation | 50 |
+| **Default wave size (lines)** | Default maximum pick lines per wave | 500 |
+| **Pick path strategy** | S-curve, Return, Midpoint, or Zone-first | S-curve |
+| **Allow partial wave release** | Release a wave even if not all orders are fully allocated | Yes |
+| **Require weight at pack** | Require carton weight entry before label can be printed | Yes |
+| **DIM weight divisor** | Dimensional weight divisor for rate calculations (typically 139 for UPS/FedEx) | 139 |
+| **Default pack verification mode** | Full verification, Count verification, or Weight-based | Full verification |
+| **Auto-close manifest** | Automatically close carrier manifests at the carrier's cutoff time | No |
+| **Default outbound type** | Default outbound type for manually created shipping orders | Standard Order |
+
+## Inventory
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| **Inventory tracking level** | Unit, Case, or Pallet | Unit |
+| **Negative inventory** | Allow inventory to go below zero (not recommended; use only for transition) | No |
+| **Multi-SKU locations** | Allow multiple SKUs in the same location by default | Yes |
+| **Commingling across accounts** | Allow multiple accounts' inventory in the same location | No |
+| **Default ABC thresholds (A)** | Order frequency for A classification (e.g., top 20% of velocity) | Top 20% |
+| **Default ABC thresholds (B)** | Order frequency for B classification | Next 30% |
+| **Cycle count frequency (A items)** | How often A items should be cycle counted | Monthly |
+| **Cycle count frequency (B items)** | How often B items should be cycle counted | Quarterly |
+| **Cycle count frequency (C items)** | How often C items should be cycle counted | Annually |
+| **Blind cycle count** | Hide system quantity from counters by default | Yes |
+
+## Billing
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| **Storage billing method** | Daily, Weekly average, or Monthly peak | Daily |
+| **Storage first day charge** | Charge for storage on the day of receipt | Yes |
+| **Storage last day charge** | Charge for storage on the day of shipment | No |
+| **Invoice numbering prefix** | Prefix for auto-generated invoice numbers (e.g., "INV-") | INV- |
+| **Invoice due date (days)** | Default payment terms in days | 30 |
+| **Auto-generate invoices** | Automatically generate draft invoices at period end | No |
+| **Tax rate** | Default tax rate applied to invoices (if applicable) | 0% |
+
+## Notifications
+
+Configure who gets notified and when. Navigate to the **Notifications** tab within System Parameters.
+
+<AccordionGroup>
+  <Accordion title="Operational alerts">
+    - **Wave behind schedule** — alert supervisor when a wave is behind its target completion time
+    - **Carrier cutoff approaching** — alert when a wave is within 30 minutes of a carrier cutoff
+    - **Label failure** — alert when a label can't be generated at pack time
+    - **Pick short** — alert supervisor when a pick short occurs
+    - **Receiving discrepancy** — alert when a receiving discrepancy exceeds tolerance
+    - **Integration error** — alert when an integration (channel, EDI) fails
+  </Accordion>
+  <Accordion title="Inventory alerts">
+    - **Low inventory** — alert when an item's available quantity drops below a threshold (configurable per item)
+    - **Lot expiring** — alert when a lot is within N days of expiration
+    - **Expired inventory** — alert when a lot has passed its expiration date with remaining on-hand quantity
+    - **Cycle count overdue** — alert when a location hasn't been counted within its scheduled frequency
+  </Accordion>
+  <Accordion title="Billing alerts">
+    - **Invoice due** — alert billing contacts when a shipper's invoice is due soon
+    - **Invoice overdue** — alert when a finalized invoice is past its due date unpaid
+    - **Minimum charge approaching** — alert account managers when an account's monthly charges are below minimum
+  </Accordion>
+  <Accordion title="Notification channels">
+    For each alert type, configure:
+    - **Email** — send to one or more email addresses
+    - **In-app** — show as a notification in the CoreX dashboard
+    - **SMS** — send via SMS (requires Twilio configuration)
+    - **Webhook** — POST to a URL (for integration with Slack, PagerDuty, etc.)
+  </Accordion>
+</AccordionGroup>
+
+## Sequences
+
+Navigate to **Admin → Sequences** to configure auto-numbering for documents. Each document type (Receiving Order, Shipping Order, Invoice, etc.) can have a custom numbering format:
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| **Prefix** | Text before the number | RO-, SO-, INV- |
+| **Starting number** | Initial counter value | 1000 |
+| **Padding** | Zero-pad the number to N digits | 6 digits → 001000 |
+| **Suffix** | Text after the number (optional) | -2026 |
+| **Reset frequency** | Reset counter annually, monthly, or never | Never |
+
+Example: Prefix "RO-", Starting 1000, Padding 6 → first RO is `RO-001000`, next is `RO-001001`.
+
+## Inbound / Outbound Types
+
+Navigate to **Admin → Inbound/Outbound Types** to create custom document types beyond the built-in defaults.
+
+For each type, configure:
+- **Name** and **code**
+- **Direction** — Inbound or Outbound
+- **Default workflow** — which receiving or shipping workflow to use
+- **QC required** — force QC for all documents of this type
+- **Billing category** — which billing event category to use for this type
+- **Color** — for visual distinction in the UI
+
+Examples of custom types:
+- Inbound: "B2B Return", "Transfer In", "Cross-Dock", "Vendor Direct"
+- Outbound: "Amazon FBA Transfer", "B2B Pallet Ship", "Sample Order", "Work Order Output"
+
+## Equipment
+
+Navigate to **Admin → Equipment** to register warehouse equipment:
+
+- Forklifts, reach trucks, pallet jacks
+- Pick carts and multi-tote carts
+- Conveyor lines (for tracking maintenance)
+
+Equipment records are used for:
+- **Maintenance scheduling** — track service intervals and upcoming maintenance
+- **Assignment tracking** — which operator is using which piece of equipment per shift
+- **Labor productivity** — factor equipment type into productivity benchmarks

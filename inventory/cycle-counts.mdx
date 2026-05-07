@@ -1,0 +1,154 @@
+---
+title: "Cycle Counts"
+description: "Verify on-hand inventory accuracy without shutting down the warehouse. Schedule, assign, and complete cycle counts with scan-confirmed results."
+icon: "clipboard-check"
+---
+
+**Cycle counting** is the process of periodically counting a subset of your inventory to verify that what the system says is in a location matches what's actually there. Unlike an annual physical inventory (which requires shutting down operations), cycle counts are done continuously — a few locations per day — so your inventory accuracy stays high without disrupting fulfillment.
+
+CoreX makes cycle counts fast and accurate: supervisors schedule the count, staff use scan-to-count on mobile terminals, and discrepancies are flagged automatically for review before any adjustments are committed.
+
+## Cycle count strategies
+
+<Tabs>
+  <Tab title="ABC Counting">
+    The most common approach. Items are classified by velocity:
+    - **A items** (high velocity) — count monthly or weekly
+    - **B items** (medium velocity) — count quarterly
+    - **C items** (low velocity) — count annually
+
+    CoreX assigns an ABC class to each item based on order frequency. Configure ABC thresholds in **Admin → System Parameters → Cycle Count Settings**.
+  </Tab>
+  <Tab title="Location-Based Counting">
+    Count locations on a rotation — e.g., 10 locations per day, cycling through the entire warehouse every 3 months. Good for warehouses with stable inventory mix and no fast/slow velocity distinction.
+  </Tab>
+  <Tab title="Random Sampling">
+    CoreX randomly selects locations or items to count each day. Provides a statistical sample of overall inventory accuracy. Good for large warehouses where counting everything frequently is impractical.
+  </Tab>
+  <Tab title="Exception-Based Counting">
+    CoreX triggers a count when a suspicious event occurs: a pick short, an unexpected barcode scan, an unusually large receipt, or a large variance in an automated report. Counts are targeted to the specific location or item involved.
+  </Tab>
+</Tabs>
+
+## Creating a cycle count
+
+Navigate to **Inventory → Cycle Counts** and click **New Cycle Count**.
+
+Configure the count:
+
+- **Count name** — a label for this count run (e.g., "A-Zone Weekly 05/07")
+- **Scope** — what to count:
+  - By **zone** — count all locations in a zone
+  - By **location** — select specific locations
+  - By **item / SKU** — count all locations where a specific item is stored
+  - By **account** — count all locations holding a specific account's inventory
+  - By **lot** — count a specific lot across all its locations
+- **Blank count** — if enabled, counters will not see the system's on-hand quantity. They count what they see and enter the number. CoreX compares to system quantity after submission. Recommended for accurate counts — blind counting prevents anchoring bias.
+- **Assigned to** — which user(s) or team are responsible for this count
+
+Click **Create**. The count is in **Draft** status and can be reviewed before release.
+
+## Releasing a cycle count
+
+Review the count details in Draft status — the list of locations or items to count, the assigned counters, and the expected scope. When ready:
+
+Click **Release Count**. The count moves to **In Progress** and appears in the assigned counters' task queues on their mobile terminals.
+
+<Note>
+  Inventory in locations scheduled for a cycle count is not locked during the count. Picks and receipts can still occur simultaneously. CoreX accounts for system transactions that happen during the count window when calculating variances.
+</Note>
+
+## Performing a count (mobile)
+
+On the mobile terminal:
+
+<Steps>
+  <Step title="Open the count task">
+    Navigate to **Inventory → Cycle Count** on the terminal. Open the assigned count task.
+  </Step>
+  <Step title="Travel to the location">
+    The terminal shows the first location to count. Travel to that location.
+  </Step>
+  <Step title="Scan the location">
+    Scan the location barcode to confirm you're at the right spot.
+  </Step>
+  <Step title="Count the inventory">
+    For each item in the location:
+    - Scan the item barcode
+    - Enter the quantity counted
+    - If lot-tracked, scan the lot label and enter the count per lot
+
+    If the location appears empty, tap **Location Empty** instead of scanning any items.
+  </Step>
+  <Step title="Submit the count">
+    After counting all items at the location, tap **Submit Location**. CoreX records your count. Move to the next location on the task.
+  </Step>
+</Steps>
+
+## Reviewing results and variances
+
+After all assigned locations are counted, the count moves to **Review** status. A supervisor reviews the results before any adjustments are committed.
+
+Navigate to the count's detail page → **Results** tab.
+
+CoreX shows a variance summary for each location and item:
+
+| Column | Description |
+|--------|-------------|
+| Location | Which location was counted |
+| SKU | Item |
+| Lot | Lot number (if applicable) |
+| System Qty | What CoreX had on record |
+| Counted Qty | What the counter entered |
+| Variance | Counted − System (positive = more than expected, negative = shortage) |
+| Variance % | Percentage variance relative to system quantity |
+
+Lines with a variance are highlighted. Click any variance line to:
+- View the transaction history for that location/item to understand what might have caused the discrepancy
+- **Request a recount** — send the counter back to recount that specific location
+- **Approve the variance** — accept the count as correct and adjust inventory
+
+### Recount
+
+If a variance seems suspicious (large discrepancy, high-value item), a supervisor can request a recount before approving:
+
+1. Click **Request Recount** on the variance line.
+2. The location is added back to the count task queue.
+3. A counter goes back to the location and counts again.
+4. The second count result is shown alongside the first. The supervisor decides which to accept.
+
+## Committing adjustments
+
+After reviewing all variances:
+
+- Click **Approve All** to approve all variances and apply inventory adjustments in bulk.
+- Or approve line by line for greater control.
+
+Approved variances generate **inventory adjustment transactions** in the system. These are visible in Stock on Hand → Transaction History for the affected items.
+
+<Warning>
+  Inventory adjustments are permanent. Once committed, they cannot be undone automatically — you would need to create a manual counter-adjustment. Always complete your review carefully before committing.
+</Warning>
+
+## Accuracy reporting
+
+CoreX tracks inventory accuracy metrics over time:
+
+- **Location accuracy rate** — percentage of counted locations with zero variance
+- **Unit accuracy rate** — (units correct / total units counted) × 100
+- **Variance by account** — which accounts' inventory has the most discrepancies
+- **Variance by zone** — which zones need more frequent counting
+
+View these metrics in **Reports → Operations Control → Inventory Accuracy**.
+
+A healthy 3PL warehouse typically targets 99%+ location accuracy for forward pick locations and 98%+ for bulk storage.
+
+## Automating cycle counts
+
+Use **Cycle Count Schedules** (**Admin → System Parameters → Cycle Count Schedules**) to have CoreX automatically generate cycle count tasks on a recurring schedule:
+
+- Set the frequency (daily, weekly)
+- Set the scope (e.g., count 20 random pick locations per day)
+- Set the assignment (e.g., assign to any available Operator)
+
+Automated counts appear in the task queue each morning for counters to work through as time allows between other tasks.

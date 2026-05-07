@@ -1,0 +1,174 @@
+---
+title: "Reports & Analytics"
+description: "Real-time dashboards and detailed reports for SLA compliance, labor productivity, carrier performance, and operations KPIs across all your accounts."
+icon: "chart-bar"
+---
+
+CoreX's reporting and analytics layer gives you complete visibility into what's happening in your warehouse — right now and over time. From real-time operational dashboards that supervisors live in during a shift, to detailed reports that account managers use for SLA reviews with their clients, CoreX has the data you need to run a tighter operation and demonstrate your value to shippers.
+
+## Report categories
+
+<CardGroup cols={2}>
+  <Card title="Operations Control Center" icon="gauge">
+    The real-time command center for your warehouse shift. Live view of receiving, shipping, inventory, and labor status across all active operations.
+  </Card>
+  <Card title="SLA Compliance" icon="clock">
+    Track on-time shipment performance by account, carrier, and service level. Identify at-risk orders before they miss their SLA.
+  </Card>
+  <Card title="Labor Productivity" icon="person-running">
+    Measure picks per hour, packs per hour, receiving throughput, and labor utilization by employee, team, and shift.
+  </Card>
+  <Card title="Carrier Performance" icon="truck">
+    On-time delivery rates, claim rates, transit time accuracy, and carrier cost analysis by carrier and service level.
+  </Card>
+  <Card title="Inventory Accuracy" icon="clipboard-check">
+    Cycle count results, variance rates, and inventory accuracy trends by location, zone, and account.
+  </Card>
+  <Card title="Billing & Revenue" icon="receipt">
+    Revenue by account, charge category, and billing period. Month-over-month comparisons and account profitability analysis.
+  </Card>
+</CardGroup>
+
+## Operations Control Center
+
+Navigate to **Reports → Operations Control** for the real-time operational dashboard.
+
+The Operations Control Center is designed to be displayed on a large screen in your warehouse supervisor's station. It shows:
+
+**Receiving panel:**
+- Trucks currently at dock / expected today
+- ROs in progress — % complete, receiver assigned
+- Receiving discrepancy count today
+- Units received today vs. target
+
+**Shipping panel:**
+- Orders by status (Ready, Waved, Picking, Packing, Staged, Shipped)
+- Carrier cutoff countdown timers — color-coded green/yellow/red
+- Active wave count and pick completion rates
+- Exceptions requiring attention
+
+**Inventory panel:**
+- Empty forward pick locations count (critical — action needed)
+- Open replenishment tasks
+- Inventory accuracy rate (from most recent cycle counts)
+- Lots expiring within 7 days
+
+**Labor panel:**
+- Headcount on floor by function (receiving, picking, packing, replenishment)
+- Units per hour by function vs. standard
+- Clock-in status by employee
+
+The dashboard refreshes every 60 seconds automatically. Individual panels can be pinned or hidden based on what's relevant to your operation.
+
+## SLA Compliance
+
+Navigate to **Reports → SLA Compliance**.
+
+<AccordionGroup>
+  <Accordion title="Cutoff compliance">
+    Measures what percentage of orders with a same-day ship commitment actually shipped by the carrier cutoff. Break down by:
+    - Account
+    - Carrier and service level
+    - Day of week (to identify problem patterns — e.g., Monday is always bad due to weekend order backlog)
+    - Order source channel
+  </Accordion>
+  <Accordion title="On-time receipt SLA">
+    Measures your receiving throughput SLA — how quickly orders are received and put away after truck arrival. Common 3PL commitments: all inbound receipts processed within 24 hours of arrival (or 48 hours for large freight).
+  </Accordion>
+  <Accordion title="Order processing time">
+    Time from order import to shipped status. Break down into components:
+    - Order-to-wave time (how long until the order was waved)
+    - Wave-to-pick complete time
+    - Pick-to-pack time
+    - Pack-to-ship time
+
+    Identifying which stage has the most lag helps you direct improvement efforts.
+  </Accordion>
+  <Accordion title="Delivery performance (carrier)">
+    Carrier-reported on-time delivery rates from tracking data. How often does your carrier deliver on the committed date? Compare across carriers to support contract negotiations.
+  </Accordion>
+</AccordionGroup>
+
+Configure SLA targets per account from the account's detail page (**Customers → Accounts → [Account] → SLA Settings**). CoreX then shows red/green/yellow indicators in SLA reports based on performance vs. target.
+
+## Labor Productivity
+
+Navigate to **Reports → Labor Productivity**.
+
+### Standard rates
+
+First, configure **Labor Standards** (**Admin → Labor Standards**) — expected throughput rates for each operation type:
+
+| Operation | Example standard |
+|-----------|----------------|
+| Receiving | 80 cartons per hour |
+| Putaway (pallet) | 15 pallets per hour |
+| Picking (each) | 120 units per hour |
+| Packing (small parcel) | 30 cartons per hour |
+| Cycle counting | 200 locations per hour |
+
+### Productivity report
+
+The Labor Productivity report shows:
+- **Units per hour** (or cartons, pallets, orders — per operation) for each employee
+- **Performance vs. standard** — % above or below the expected rate
+- **Total hours worked** vs. **productive hours** (time actually performing tasks vs. idle/support time)
+- **By shift** — compare productivity across morning, afternoon, and evening shifts
+
+Use this data for:
+- Performance coaching and reviews
+- Incentive program tracking (if you pay productivity bonuses)
+- Capacity planning (if you know your pick rate, you can staff waves appropriately)
+
+### Shift Summary report
+
+**Reports → Shift Summary** gives a one-page summary of everything that happened in a shift:
+- Units received, orders shipped, orders picked, orders packed
+- Headcount and total labor hours
+- Exceptions opened and resolved
+- SLA compliance for the shift
+- Comparison to prior week same-day
+
+Shift summaries can be emailed automatically to supervisors at the end of each shift.
+
+## Carrier Quote History
+
+Navigate to **Reports → Carrier Quote History** to see all rated shipments:
+
+- Every rate request made at pack time
+- All carrier/service combinations quoted
+- The rate selected and the reason (cheapest, preferred, rule-forced)
+- Actual carrier charge (if carrier invoice audit is configured)
+
+Use this report to:
+- Audit whether your carrier rules are firing correctly
+- Identify savings opportunities if a consistently cheaper carrier is consistently losing to a preferred carrier
+- Identify shipments where actual carrier charges differ from quoted rates (carrier billing disputes)
+
+## Report Generator
+
+Navigate to **Reports → Report Generator** to build custom reports on any data in CoreX.
+
+The report generator lets you:
+1. **Choose your data source** — Shipping Orders, Receiving Orders, Inventory, Billing Transactions, Cycle Counts, etc.
+2. **Select fields** — choose which columns to include in the report
+3. **Apply filters** — filter by date range, account, status, item, carrier, etc.
+4. **Group and aggregate** — group by account, date, SKU, etc. and sum or average numeric fields
+5. **Sort** — sort by any column
+6. **Save and schedule** — save the report configuration and optionally schedule it to run and email automatically
+
+Custom reports can be exported to CSV or PDF on demand. Scheduled reports can be emailed daily, weekly, or monthly to any CoreX user or external email address.
+
+<Tip>
+  Save your most-used custom reports as **Favorites** for quick access from the Reports home page. Shared reports (visible to all users with report access) can be created by Admins and Managers.
+</Tip>
+
+## Seller Portal analytics
+
+Your shipper clients see a limited analytics view in their **Seller Portal**:
+- Their own order status and shipping history
+- Inventory levels and lot aging
+- Invoice history and billing summary
+- SLA performance (your on-time rate against commitments to them)
+
+You control which data is visible in the Seller Portal from **Admin → Branding → Seller Portal Settings**. Giving shippers self-service visibility reduces inbound questions and builds trust.

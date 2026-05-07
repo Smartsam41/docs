@@ -1,0 +1,143 @@
+---
+title: "EDI"
+description: "Exchange standard EDI transaction sets with retail trading partners. 850 POs, 856 ASNs, 940 warehouse orders, 945 shipping advice, and 810 invoices."
+icon: "file-lines"
+---
+
+**Electronic Data Interchange (EDI)** is the standard for exchanging structured business documents with retail trading partners — big-box retailers, grocery chains, and wholesale distributors that require EDI compliance. CoreX includes a built-in EDI processing engine that handles inbound and outbound transaction sets, maps them to CoreX documents, and manages acknowledgment and compliance workflows.
+
+## Supported transaction sets
+
+CoreX supports the ANSI X12 standard (most common in North America). EDIFACT is supported on request for international trading partners.
+
+| Transaction Set | Direction | Description |
+|----------------|-----------|-------------|
+| **850** | Inbound | Purchase Order — retailer sends a PO to your shipper |
+| **855** | Outbound | Purchase Order Acknowledgment — acknowledge receipt of an 850 |
+| **856** | Outbound | Advance Ship Notice (ASN) — notify the retailer before shipment |
+| **940** | Inbound | Warehouse Shipping Order — direct ship order from retailer |
+| **945** | Outbound | Warehouse Shipping Advice — confirm fulfillment of a 940 |
+| **943** | Inbound | Warehouse Stock Transfer — inbound transfer order |
+| **944** | Outbound | Warehouse Stock Transfer Receipt — confirm transfer received |
+| **810** | Outbound | Invoice — bill the trading partner |
+| **820** | Inbound | Payment Order / Remittance — payment confirmation from partner |
+| **997** | Both | Functional Acknowledgment — confirm receipt of any transaction set |
+
+## Setting up EDI
+
+Navigate to **Admin → EDI Processing** to manage EDI configuration.
+
+### Step 1: Configure communication
+
+EDI documents are exchanged via:
+
+<Tabs>
+  <Tab title="AS2 (Applicability Statement 2)">
+    The most common EDI transport protocol for retail trading partners. AS2 sends EDI files over HTTPS with digital signatures and message receipts (MDN).
+
+    Configure in **Admin → EDI Processing → AS2 Settings**:
+    - Your AS2 identifier (provided by CoreX)
+    - Partner's AS2 identifier
+    - Partner's AS2 URL
+    - Certificates (upload your private key and the partner's public certificate)
+  </Tab>
+  <Tab title="SFTP">
+    File-based EDI via secure FTP. CoreX monitors an SFTP folder for inbound files and deposits outbound files to a specified folder on the partner's SFTP server.
+
+    Configure in **Admin → EDI Processing → SFTP Connections**:
+    - SFTP host, port, username, and password/key
+    - Inbound folder path
+    - Outbound folder path
+    - Poll frequency (how often to check for new files)
+  </Tab>
+  <Tab title="VAN (Value Added Network)">
+    Some trading partners use a third-party VAN (like SPS Commerce or TrueCommerce) as an intermediary. CoreX can connect to VANs via AS2 or SFTP. Contact your VAN provider for their connection settings.
+  </Tab>
+</Tabs>
+
+### Step 2: Configure a trading partner
+
+Click **New Trading Partner** and fill in:
+- **Partner name** — the retailer or distributor (e.g., "Target", "Whole Foods")
+- **ISA/GS identifiers** — the EDI interchange and group identifiers for this partner
+- **Account mapping** — link to the shipper account in CoreX that handles this trading partner's goods
+- **Transaction sets** — which transaction sets are active for this partner
+- **Processing rules** — any partner-specific field mappings or compliance requirements
+
+### Step 3: Test the connection
+
+Use **Send Test** to send a test 997 acknowledgment to the partner's endpoint. Verify they receive it and respond. Most trading partners have an onboarding process that requires testing before going live.
+
+## Inbound EDI processing
+
+When CoreX receives an EDI file from a trading partner:
+
+<Steps>
+  <Step title="File received">
+    CoreX receives the EDI file via AS2 or SFTP and sends an automatic **997 Functional Acknowledgment** to confirm receipt.
+  </Step>
+  <Step title="Parsing and validation">
+    CoreX parses the EDI file, validates the structure against the transaction set specification, and checks for required fields. Parsing errors are flagged in **Admin → EDI Processing → Error Queue**.
+  </Step>
+  <Step title="Document creation">
+    Valid transactions are converted to CoreX documents:
+    - **850 PO** → creates a **Purchase Order** in CoreX (Receive → Purchase Orders)
+    - **940 Warehouse Order** → creates a **Shipping Order** in CoreX (Ship → Shipping Orders)
+    - **943 Transfer** → creates a **Receiving Order** for an inbound transfer
+
+    The source EDI data is stored on the document for reference and audit.
+  </Step>
+  <Step title="Notification">
+    A notification is sent to the relevant account manager that a new EDI document has been imported. The document appears in the normal CoreX queues for processing.
+  </Step>
+</Steps>
+
+## Outbound EDI generation
+
+CoreX generates outbound EDI documents automatically when the triggering event occurs:
+
+| Trigger | Generated Document |
+|---------|--------------------|
+| Shipping order shipped | **856 ASN** sent to the retailer |
+| 850 PO received | **855 PO Acknowledgment** (auto-sent or queued for review) |
+| 940 order fulfilled | **945 Shipping Advice** sent to the retailer |
+| Invoice generated | **810 Invoice** sent to the trading partner |
+
+Outbound documents can be configured to send automatically or to queue for supervisor review before transmission — configurable per partner and per transaction type.
+
+## EDI compliance requirements
+
+Different trading partners have different field requirements and formatting standards beyond the base ANSI X12 spec. CoreX's EDI engine supports partner-specific compliance:
+
+- **GS1 barcode labeling** — generate GS1-128 pallet labels (required by most large retailers) from the 856 ASN
+- **UCC-128 labels** — retailer-specific label formats with required data elements (PO number, department, store number)
+- **Packing requirements** — carton quantity requirements, pallet configuration requirements (per ASN)
+- **Routing guides** — carrier and service level requirements per destination (Target stores, Walmart DCs, etc.)
+
+Configure compliance settings per trading partner in **Admin → EDI Processing → [Partner] → Compliance**.
+
+<Warning>
+  Retailer chargebacks for EDI non-compliance (late ASNs, incorrect labels, routing guide violations) can be significant — $500+ per violation in some cases. Review your trading partners' compliance requirements carefully and test thoroughly before going live.
+</Warning>
+
+## EDI error handling
+
+Navigate to **Admin → EDI Processing → Error Queue** to see all EDI errors:
+
+- **Parse errors** — malformed EDI files that CoreX couldn't parse
+- **Validation errors** — files that parsed correctly but failed business validation (missing required fields, unknown identifiers)
+- **Processing errors** — files that validated but failed to create a CoreX document (e.g., unknown SKU)
+
+Each error shows the raw EDI data alongside the error message. Resolve errors by:
+- Correcting the underlying data issue and reprocessing
+- Manually creating the CoreX document and linking it to the EDI transaction
+- Rejecting the transaction and notifying the partner
+
+## EDI audit trail
+
+Every EDI file received and sent is stored in CoreX's EDI transaction log:
+
+- Inbound: raw file, parse result, linked CoreX document
+- Outbound: generated EDI content, transmission status, acknowledgment received
+
+Navigate to **Admin → EDI Processing → Transaction Log** to search and review historical transactions. The log is retained for 7 years to support trading partner audits.

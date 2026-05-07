@@ -1,0 +1,120 @@
+---
+title: "Integrations Overview"
+description: "Connect CoreX to your order channels, carrier systems, ERPs, and custom applications. Shopify, Amazon, EDI, REST API, and webhooks."
+icon: "plug"
+---
+
+CoreX is built to connect. Your shippers sell on multiple channels, ship with multiple carriers, and run a variety of ERPs and order management systems. CoreX's integration layer handles the complexity of connecting all of these so your warehouse operations can run on a single, authoritative system.
+
+## Integration types
+
+<CardGroup cols={2}>
+  <Card title="Channels" icon="store" href="/integrations/channels">
+    Connect Shopify, Amazon, and other e-commerce platforms to automatically import orders and sync inventory.
+  </Card>
+  <Card title="REST API" icon="code" href="/integrations/api">
+    Full programmatic access to CoreX. Create orders, query inventory, receive webhooks, and build custom integrations.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/integrations/webhooks">
+    Subscribe to real-time events from CoreX — order shipped, inventory updated, receiving complete — and push to any HTTP endpoint.
+  </Card>
+  <Card title="EDI" icon="file-lines" href="/integrations/edi">
+    Exchange standard EDI transaction sets with retail trading partners: 850 PO, 856 ASN, 940 WO, 945 shipping advice, 810 invoice.
+  </Card>
+</CardGroup>
+
+## The Integration Store
+
+Navigate to **Admin → Integration Store** to browse and connect pre-built integrations. The Integration Store lists all available connectors with setup guides, required credentials, and configuration options.
+
+Connectors in the Integration Store:
+
+<Tabs>
+  <Tab title="E-Commerce">
+    - Shopify
+    - Amazon Seller Central
+    - Amazon Vendor Central
+    - WooCommerce
+    - BigCommerce
+    - Magento / Adobe Commerce
+    - Wix
+    - Squarespace Commerce
+  </Tab>
+  <Tab title="Order Management">
+    - ShipStation (for cross-platform order aggregation)
+    - Linnworks
+    - ChannelAdvisor
+    - Skubana / Extensiv
+    - Ordoro
+  </Tab>
+  <Tab title="ERP / Accounting">
+    - NetSuite
+    - QuickBooks Online
+    - SAP (via API)
+    - Microsoft Dynamics (via API)
+  </Tab>
+  <Tab title="Carriers">
+    - EasyPost (multi-carrier)
+    - Stamps.com (USPS)
+    - ShipEngine (multi-carrier)
+    - Individual carrier direct APIs (see Carriers setup)
+  </Tab>
+</Tabs>
+
+## Setting up an integration
+
+Most integrations follow the same setup flow:
+
+<Steps>
+  <Step title="Open the Integration Store">
+    Navigate to **Admin → Integration Store** and click the integration you want to set up.
+  </Step>
+  <Step title="Authenticate">
+    Depending on the platform, authenticate via:
+    - **OAuth** — click "Connect" and authorize CoreX in the platform's interface (Shopify, Amazon)
+    - **API key** — paste your API key and secret from the platform's developer settings
+    - **SFTP** — configure SFTP credentials for file-based EDI or batch imports
+  </Step>
+  <Step title="Map to an account">
+    Most integrations are mapped to a specific shipper account in CoreX. Orders from this integration flow to that account's order queue.
+  </Step>
+  <Step title="Configure sync settings">
+    - **Order import** — which order statuses to import, how frequently to pull new orders
+    - **Inventory sync** — whether to push inventory levels back to the channel, and at what frequency
+    - **Fulfillment confirmation** — whether to push tracking numbers and order status back to the channel after shipment
+  </Step>
+  <Step title="Test and activate">
+    Use the **Test Connection** button to verify the integration is working. Then enable it. A green indicator on the Integration Store card shows the integration is active.
+  </Step>
+</Steps>
+
+## API Keys
+
+For custom integrations built against the CoreX REST API, generate API keys from **Admin → API Keys**:
+
+1. Click **New API Key**.
+2. Set a name (e.g., "ACME ERP Integration") and an optional expiry date.
+3. Assign permissions (read-only, full access, or scoped to specific resources).
+4. Click **Create**. Copy the API key — it will only be shown once.
+
+See [REST API](/integrations/api) for documentation on available endpoints.
+
+## Integration health monitoring
+
+Navigate to **Admin → Integration Store** to see the health status of all connected integrations:
+
+- **Last sync time** — when the integration last successfully synced
+- **Error count** — number of errors in the last 24 hours
+- **Queue depth** — orders waiting to be imported
+
+Click any integration to see its detailed sync log — every import run with success/error status and the ability to retry failed items.
+
+<Note>
+  Integration errors are also surfaced in **Admin → Exceptions**. Unresolved integration errors older than 24 hours generate a system alert to the warehouse Admin.
+</Note>
+
+## Data security
+
+All integrations in CoreX use encrypted connections (TLS 1.2+). Credentials and API keys are stored encrypted at rest. CoreX never stores plaintext passwords.
+
+For compliance-sensitive integrations (healthcare, finance), CoreX supports IP allowlisting for API access — only requests from specific IP addresses will be accepted.

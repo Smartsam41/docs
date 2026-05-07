@@ -1,0 +1,114 @@
+---
+title: "Billing Overview"
+description: "How CoreX handles 3PL billing — capturing billable events automatically as orders flow through the warehouse, and rolling them into accurate invoices."
+icon: "receipt"
+---
+
+Billing is one of the most operationally complex parts of running a 3PL — and one of the most financially consequential. CoreX automates the entire billing lifecycle: every time a chargeable event occurs in the warehouse (a pallet received, an order picked, a carton shipped), CoreX captures it against the active rate card for that account. At billing time, those events are already collected and organized, ready to be rolled into an invoice with a click.
+
+## Billing concepts
+
+**Rate Cards** define what you charge per event type for each shipper account. A rate card contains line items for receiving, storage, handling, outbound shipping, and any special services. See [Rate Cards](/billing/rate-cards) for full detail.
+
+**Billable Events** are the individual charges captured by CoreX as operations happen:
+- 1 pallet received → receiving fee
+- 1 order picked → pick fee
+- 1 carton shipped → outbound handling fee
+- 5 pallets stored for 30 days → storage fee
+- 1 return processed → return handling fee
+
+Events are captured in real time and held in the account's **Billing Transactions** queue.
+
+**Invoices** are the periodic summaries of billable events presented to the shipper for payment. CoreX generates invoices by account, for a specified billing period, pulling all unbilled transactions and rolling them into a formatted invoice document.
+
+## Billing flow
+
+<Steps>
+  <Step title="Rate card is configured">
+    Before any billing can happen, set up a rate card for each shipper account. Navigate to **Billing → Rate Cards → New Rate Card**.
+  </Step>
+  <Step title="Events are captured automatically">
+    As operations run — receiving, picking, packing, shipping, returns — CoreX records billable events against the account's active rate card. No manual entry is required.
+  </Step>
+  <Step title="Events are reviewed in the Billing Dashboard">
+    Supervisors and billing staff can review pending billable events at any time from **Customers → Billing Dashboard**. Filter by account and date to see what's accumulated since the last invoice.
+  </Step>
+  <Step title="Invoice is generated">
+    At the end of the billing period (weekly, bi-weekly, or monthly, per account), navigate to **Billing → Invoices** and click **Generate Invoice** for the account. CoreX pulls all unbilled events for the period and creates a draft invoice.
+  </Step>
+  <Step title="Invoice is reviewed and finalized">
+    Review the draft invoice, add any manual line items or credits, and click **Finalize**. The invoice is locked and ready to send.
+  </Step>
+  <Step title="Invoice is sent to the shipper">
+    Send the invoice to the shipper via email or make it available in the Seller Portal. Shippers can view, download, and dispute invoices from their portal access.
+  </Step>
+</Steps>
+
+## Key billing screens
+
+<CardGroup cols={2}>
+  <Card title="Rate Cards" icon="sliders" href="/billing/rate-cards">
+    Define per-account pricing for every billable service: receiving, storage, pick/pack, shipping, and specials.
+  </Card>
+  <Card title="Invoices" icon="file-invoice" href="/billing/invoicing">
+    Generate, review, finalize, and send invoices. Track payment status.
+  </Card>
+  <Card title="Billing Dashboard" icon="gauge" href="/billing/overview#billing-dashboard">
+    Real-time view of unbilled events by account. Catch billing issues before invoice time.
+  </Card>
+  <Card title="Billing Transactions" icon="list" href="/billing/invoicing#transactions">
+    The raw event-level detail behind every invoice line. Full audit trail.
+  </Card>
+</CardGroup>
+
+## Billing Dashboard
+
+Navigate to **Customers → Billing Dashboard** for a real-time summary of billing activity across all accounts:
+
+- **Unbilled balance per account** — how much has accrued since the last invoice
+- **Events by category** — receiving, storage, handling, outbound, specials
+- **Month-to-date vs. prior month** — account-level revenue comparison
+- **Accounts approaching billing period end** — flag accounts due for invoicing soon
+
+Click any account row to drill into the **Billing Transactions** for that account and see the individual events.
+
+## Storage billing
+
+Storage fees are often the most complex part of 3PL billing because they're time-based rather than event-based. CoreX handles storage billing automatically:
+
+- **Daily storage calculation** — CoreX records a daily snapshot of pallet positions (or cubic feet, or units — per your rate card) for each account
+- **Billing period rollup** — at invoice time, CoreX sums the daily storage values across the billing period and multiplies by the rate
+- **First-day vs. last-day** — configurable whether storage is charged for the day of receipt, day of shipment, or neither
+
+Configure storage billing settings per account in the rate card's **Storage** section.
+
+<Tip>
+  Enable **Storage Snapshots** alerts in **Admin → System Parameters → Billing** to get a daily email showing each account's pallet count. Catch unusual spikes (a large unexpected shipment) before they show up as a surprise on an invoice.
+</Tip>
+
+## Special services billing
+
+Charges for services outside standard receive/store/ship can be added to a rate card as **Special Services**:
+
+- Kitting and assembly
+- Labeling and relabeling
+- QC inspection fees
+- Returns processing
+- Hazmat handling
+- Repackaging
+- Detention fees (for trucks held beyond free time)
+
+Special service events can be captured:
+- **Automatically** — when the service is completed in the system (e.g., a return is processed)
+- **Manually** — a supervisor adds a billing transaction from the Billing Dashboard for services that aren't automatically tracked
+
+## Manual billing transactions
+
+For one-off charges that don't fit standard event capture:
+
+1. Navigate to **Customers → Billing Dashboard** → select the account.
+2. Click **Add Manual Transaction**.
+3. Select the service type, enter the quantity and rate (or dollar amount), and add a description.
+4. The transaction is added to the account's unbilled queue and will appear on the next invoice.
+
+Manual transactions are audited — the creating user and timestamp are recorded.

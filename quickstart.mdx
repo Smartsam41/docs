@@ -1,0 +1,145 @@
+---
+title: "Quickstart"
+description: "Get your warehouse operational in CoreX. This guide walks you through the essential setup steps from a blank account to running your first receiving and shipping order."
+icon: "rocket"
+---
+
+This guide covers the minimum configuration needed to start receiving and fulfilling orders in CoreX WMS. Plan for about 30–60 minutes for initial setup, depending on the complexity of your location structure and carrier accounts.
+
+<Note>
+  You'll need **Admin** role access to complete the setup steps in this guide. If you're not an Admin, share this guide with your warehouse administrator.
+</Note>
+
+<Steps>
+
+  <Step title="Create your company profile">
+    After logging in for the first time, navigate to **Admin → Company Profile**. Fill in:
+
+    - **Company name** — Your 3PL's legal business name, shown on invoices and the shipper portal.
+    - **Address** — Your primary warehouse address. This is used as the ship-from address for carrier labels unless overridden.
+    - **Time zone** — Set this correctly. Wave cutoff times, SLA calculations, and shift reports all depend on your warehouse time zone.
+    - **Logo** — Upload your logo (PNG or SVG, recommended 400×120px). It appears on the Seller Portal and on generated invoices.
+
+    Click **Save** when done.
+  </Step>
+
+  <Step title="Define your warehouse locations">
+    CoreX manages inventory at the location level, so you need to define your location structure before you can store anything.
+
+    Go to **Admin → Locations** (or **Inventory → Locations** from the main nav).
+
+    **Create your zones first.** Zones group locations for putaway rules and wave optimization. Common zones:
+    - Bulk (pallet storage)
+    - Pick (forward pick shelving)
+    - Receiving / Staging
+    - Pack stations
+    - Dock doors
+
+    **Then create locations within each zone.** You can create locations one by one or use the **Import** tool (Admin → Import → Locations) to bulk-upload a CSV with columns: `name`, `zone`, `type`, `aisle`, `bay`, `level`, `capacity_uom`, `capacity`.
+
+    Location naming convention example: `A-01-A` = Aisle A, Bay 01, Level A (bottom). Use a consistent convention — it drives pick path sequencing.
+
+    <Tip>
+      Use **Admin → Sequences** to configure auto-numbering for location names if you want CoreX to generate names for you.
+    </Tip>
+  </Step>
+
+  <Step title="Set up your carriers">
+    Navigate to **Admin → Carriers** to connect your shipping carrier accounts.
+
+    CoreX supports direct integrations with major small-parcel and freight carriers. Click **Add Carrier** and select your carrier from the list. You'll be prompted for your account credentials (account number, meter number, API key, etc. depending on the carrier).
+
+    Once connected, go to **Admin → Carrier Rules** to define which carriers and service levels are available for each shipper account, and under what conditions (weight limits, destination zones, etc.).
+
+    <Warning>
+      Carrier credentials are stored encrypted and never logged. However, test your carrier connection using the **Rate Test** button before going live — a misconfigured account will cause label failures at pack time.
+    </Warning>
+  </Step>
+
+  <Step title="Add your first shipper account">
+    Every client you warehouse for is an **Account** in CoreX. Navigate to **Customers → Accounts** and click **New Account**.
+
+    Fill in the account details:
+    - **Account name** and **code** (short identifier, e.g. `ACME`)
+    - **Contact information**
+    - **Default carrier preferences** — which carriers and service levels to use by default for this account's outbound orders
+    - **Billing currency and terms**
+
+    Once the account is created, you can:
+    - Invite the shipper to the **Seller Portal** from the account's Users tab
+    - Assign a **Rate Card** (see Billing → Rate Cards)
+    - Configure account-level **Allocation Rules** for how inventory is reserved
+
+    <Note>
+      You can add more accounts at any time. There's no limit on the number of shipper accounts.
+    </Note>
+  </Step>
+
+  <Step title="Configure a rate card">
+    Navigate to **Billing → Rate Cards** and click **New Rate Card**. Assign it to your shipper account.
+
+    A rate card defines what you charge for:
+    - **Receiving** — per pallet, per carton, or per unit received
+    - **Storage** — per pallet position per day/week/month
+    - **Pick & pack handling** — per order, per unit picked, per carton packed
+    - **Outbound shipping** — pass-through, markup percentage, or flat fee per shipment
+    - **Special services** — kitting, labeling, returns, etc.
+
+    Save the rate card and set it as the **Active** rate card for the account. CoreX will automatically capture billable events against this rate card as orders flow through the warehouse.
+  </Step>
+
+  <Step title="Create your first receiving order">
+    Navigate to **Receive → Receiving Orders** and click **New Receiving Order**.
+
+    Select your shipper account, then fill in:
+    - **Expected arrival date**
+    - **Supplier / vendor** (optional, but useful for supplier scorecards)
+    - **Line items** — add the SKUs and expected quantities you're expecting to receive. If the account has items already set up in **Inventory → Items**, you can search by SKU or barcode.
+
+    Save the receiving order. It will appear in status **Pending** until a dock appointment is scheduled or until it's opened for receiving.
+
+    To schedule a dock appointment, click **Schedule Appointment** on the receiving order and pick a dock door and time slot from the **Dock Scheduler**.
+
+    Once the truck arrives, open the receiving order and click **Start Receiving**. Hand a scanner to your receiver and walk through the **Scan to Receive** flow. See [Scan to Receive](/receiving/scan-to-receive) for the full scanning workflow.
+  </Step>
+
+  <Step title="Create your first shipping order">
+    Navigate to **Ship → Shipping Orders** and click **New Shipping Order**.
+
+    Select the shipper account, then fill in:
+    - **Ship-to address** — the end customer's delivery address
+    - **Requested ship date** and **service level**
+    - **Line items** — the SKUs and quantities to ship
+
+    Save the order. It will enter status **Ready** once inventory is allocated.
+
+    To fulfill the order:
+    1. Go to **Ship → Waves** and create a new wave, or add the order to an existing open wave.
+    2. Release the wave. CoreX generates a pick list and creates tasks in the **Task Queue**.
+    3. A picker scans through **Scan to Pick** on their mobile terminal.
+    4. A packer works through **Scan to Pack** at a pack station, selects or scans the carton, and CoreX rates and prints the carrier label.
+    5. The order moves to **Shipped** status once the label is printed and scan-confirmed.
+
+    See [Waves](/shipping/waves) and [Scanning](/shipping/scanning) for full details on the pick/pack workflow.
+  </Step>
+
+</Steps>
+
+## What's next
+
+Now that your warehouse is running, explore these areas to get more out of CoreX:
+
+<CardGroup cols={2}>
+  <Card title="Wave Planning" icon="layer-group" href="/shipping/waves">
+    Learn how to configure auto-wave rules, cutoff times, and pick path optimization.
+  </Card>
+  <Card title="Putaway Rules" icon="arrow-down-to-bracket" href="/admin/rules">
+    Set up directed putaway so CoreX automatically assigns locations during receiving.
+  </Card>
+  <Card title="Integrations" icon="plug" href="/integrations/overview">
+    Connect Shopify, Amazon, or your own system to auto-import orders.
+  </Card>
+  <Card title="Reports" icon="chart-bar" href="/reports/overview">
+    Monitor SLA, labor productivity, and carrier performance from the analytics dashboards.
+  </Card>
+</CardGroup>

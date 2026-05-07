@@ -1,0 +1,148 @@
+---
+title: "Locations"
+description: "Define and manage your warehouse location structure — zones, location types, capacity rules, and the physical layout that drives putaway and pick path optimization."
+icon: "map-pin"
+---
+
+**Locations** are the building blocks of your warehouse in CoreX. Every storage position — from a bin on a shelving unit to a floor pallet spot to a dock door — is a named location. CoreX uses your location structure to direct putaway, optimize pick paths, manage capacity, and track where every unit of inventory lives.
+
+## Location hierarchy
+
+Locations are organized into a hierarchy:
+
+```
+Warehouse
+└── Zone (e.g., "Bulk Storage", "Forward Pick", "Receiving Dock")
+    └── Aisle (e.g., "Aisle A", "Aisle B")
+        └── Bay (e.g., "Bay 01", "Bay 02")
+            └── Level (e.g., "Level A" (bottom), "Level B", "Level C")
+                └── Position (optional sub-location within a level)
+```
+
+Not all levels are required. A small warehouse might have just Zone → Location. A large distribution center might use all five levels.
+
+## Location types
+
+Each location has a **type** that determines what operations can be performed there and how CoreX routes product:
+
+| Type | Description |
+|------|-------------|
+| **Receive** | Inbound receiving staging area. Product is scanned in here before putaway. |
+| **Storage / Bulk** | Primary storage. Usually pallet or floor positions for large quantities. |
+| **Pick** | Forward pick location. Smaller quantities, optimized for fast picking. |
+| **Pack** | Pack station location. Packing happens here; cartons are staged nearby. |
+| **Stage (Outbound)** | Staging area for packed/labeled cartons awaiting carrier pickup. |
+| **Stage (Inbound)** | Receiving staging area before putaway. |
+| **Quarantine** | Holds inventory flagged for QC or investigation. Not pickable. |
+| **Dock** | Physical dock door position. |
+| **Yard** | Outdoor yard slot for trailers. |
+| **Virtual** | Non-physical location for tracking purposes (e.g., "In Transit", "Disposed"). |
+
+## Creating locations
+
+Navigate to **Inventory → Locations** (or **Admin → Locations**) and click **New Location**.
+
+### Single location
+
+Fill in:
+- **Location code** — unique identifier (e.g., `A-01-A`). Must be unique in the warehouse.
+- **Zone** — assign to a zone
+- **Type** — see types above
+- **Aisle / Bay / Level** — enter the physical position coordinates for pick path optimization
+- **Barcode** — the barcode printed on the location label (defaults to the location code)
+- **Capacity** — the maximum the location can hold, expressed as:
+  - Pallet positions (for bulk storage)
+  - Weight (lbs/kg)
+  - Volume (cubic ft/cm)
+  - Unit count
+- **Multi-SKU** — whether this location can hold multiple SKUs simultaneously. For forward pick, usually one SKU per location. For bulk, multi-SKU is common.
+- **Active** — whether this location is available for use
+
+### Bulk location creation
+
+For large warehouses, use **Bulk Create** to generate many locations at once:
+
+1. Click **Bulk Create**.
+2. Set the zone, type, and naming pattern (e.g., Zone: Bulk, Prefix: A, Aisles: 1–20, Bays: 01–10, Levels: A–E).
+3. CoreX generates location codes following the pattern (e.g., A-01-A, A-01-B, ..., A-20-E).
+4. Review and confirm.
+
+Or import locations via CSV: **Admin → Import → Locations**.
+
+## Zones
+
+**Zones** group locations for operational purposes. Navigate to **Inventory → Locations → Zones** to manage zones.
+
+For each zone, configure:
+- **Zone name** (e.g., "Bulk Pallet", "Forward Pick", "Frozen", "Hazmat")
+- **Default location type** — the type assigned to new locations in this zone
+- **Pick sequence** — the order zones are picked in during wave optimization (e.g., always pick Forward Pick zone before Bulk zone)
+- **Putaway priority** — when putaway rules don't specify a location, prefer this zone
+- **Allowed item classes** — restrict which item categories can be stored in this zone (e.g., only Hazmat items in the Hazmat zone)
+
+## Location labels
+
+Print barcode labels for your locations from **Inventory → Locations → Print Labels**. Select the locations to print and choose the label format:
+
+- **1×1 inch** — for bin labels on shelving
+- **2×4 inch** — for rack and bay labels
+- **4×6 inch** — for large dock door or aisle signs
+
+Labels print with the location barcode and human-readable location code. Scannable labels are required for scan-to-receive, scan-to-pick, and scan-to-pack.
+
+## Capacity management
+
+CoreX tracks location utilization in real time based on the inventory stored there. When a location reaches capacity, CoreX's putaway rules will skip it and use the next eligible location.
+
+View location capacity utilization from:
+- **Inventory → By Location** — shows current utilization % per location
+- **Reports → Operations Control** — warehouse-wide capacity heatmap
+
+### Setting capacity
+
+Capacity can be set as:
+- **Pallet positions** — most common for bulk racking. A single-deep pallet position = 1 pallet.
+- **Weight limit** — maximum weight the floor or racking can hold at this position.
+- **Volume** — maximum cubic space.
+- **Unit count** — maximum number of units (useful for fixed-slot forward pick bins).
+
+You can set multiple capacity constraints on a location (e.g., max 1 pallet AND max 2,500 lbs).
+
+## Pick path configuration
+
+CoreX uses location coordinates (aisle, bay, level) to sequence pick tasks in an optimized path through the warehouse. Make sure every storage and pick location has accurate coordinates set.
+
+To set coordinates:
+1. Open a location's detail page.
+2. Click **Edit**.
+3. Enter **Aisle**, **Bay**, **Level**, and optionally **Position** as numbers.
+4. Save.
+
+Locations without coordinates are sorted to the end of pick paths.
+
+<Tip>
+  Use the **Location Map** view (Inventory → Locations → Map) to visually verify your location coordinates. The map shows your warehouse layout based on the coordinates entered. Outlier locations (visually in the wrong spot) usually have a data entry error.
+</Tip>
+
+## Location holds and restrictions
+
+**Lock a location** to prevent any inventory from being received into or picked from it (e.g., while you're doing maintenance on a rack):
+
+1. Open the location → click **Lock Location**.
+2. Enter a reason.
+3. The location is locked — CoreX will skip it during putaway and picking.
+
+To unlock: click **Unlock Location**.
+
+This is different from a **quarantine location** — a locked location is inaccessible entirely, while a quarantine location accepts inventory but prevents it from being picked for orders.
+
+## Slotting
+
+**Slotting** is the practice of assigning the right SKUs to the right locations to optimize pick efficiency. CoreX's slotting tools (available in **Ship → Slotting**) analyze order velocity and item characteristics to suggest location assignments:
+
+- High-velocity items → closest forward pick locations to the pack stations
+- Heavy items → lower shelf levels
+- Items frequently ordered together → adjacent locations
+- Slow movers → bulk storage, further from pack
+
+Run a **Slotting Optimization** analysis periodically (monthly or quarterly) and review the recommendations. CoreX generates move tasks for your team to physically relocate product to the suggested positions.

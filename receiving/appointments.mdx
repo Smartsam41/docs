@@ -1,0 +1,119 @@
+---
+title: "Appointments & Dock Scheduling"
+description: "Manage dock appointments, yard slots, and truck check-ins. Keep your dock doors organized and your receiving team ready."
+icon: "calendar"
+---
+
+The **Appointments** module gives you visibility and control over your dock doors and yard. Schedule inbound (and outbound) truck appointments, manage yard slots, track truck arrivals, and give your receiving team advance notice of what's coming and when.
+
+## Dock Scheduler
+
+Navigate to **Receive → Dock Scheduler** to see your dock door calendar. The scheduler shows a timeline view of all booked appointment slots across your dock doors, color-coded by appointment type (inbound, outbound, LTL, FTL).
+
+### Views
+
+<Tabs>
+  <Tab title="Day View">
+    A detailed view of all dock doors for a single day. Each door shows its scheduled appointments as blocks on a timeline, with appointment type, account name, and expected carton/pallet count. Use this view on the day of operations to track truck arrival and departure status.
+  </Tab>
+  <Tab title="Week View">
+    A week-at-a-glance view showing appointment density per door per day. Useful for planning staffing levels and identifying under- or over-booked days.
+  </Tab>
+  <Tab title="List View">
+    A filterable table of all appointments in a date range. Sortable by door, account, appointment type, carrier, and status. Best for exporting and reporting.
+  </Tab>
+</Tabs>
+
+## Creating an appointment
+
+Click **New Appointment** from the Dock Scheduler or from the **Appointments** list.
+
+Fill in:
+
+- **Account** — the shipper account the truck is delivering for
+- **Appointment type** — Inbound Receiving, Outbound Pickup, LTL Drop, FTL Delivery, Cross-Dock, etc. Types are configurable in **Admin → Inbound/Outbound Types** and control how long the slot is blocked.
+- **Dock door** — which dock door to assign. CoreX shows availability in real time.
+- **Date and time** — the scheduled appointment window
+- **Expected freight details** — pallet count, carton count, estimated weight (used for resource planning)
+- **Carrier / driver info** — carrier name, pro number, driver name and cell (optional)
+- **Linked Receiving Order** — optionally link an existing RO to this appointment. If no RO exists yet, you can create one later and link it.
+
+Click **Save**. The appointment is booked and appears on the dock calendar.
+
+<Note>
+  If you enable **Supplier Self-Scheduling**, suppliers receive an emailed link to book their own appointment slots within the windows you've defined. Self-scheduled appointments require supervisor approval before they're confirmed.
+</Note>
+
+## Dock door setup
+
+Before scheduling appointments, make sure your dock doors are configured in **Admin → Dock Doors**. For each door, set:
+
+- **Door name / number**
+- **Door type** — can accept LTL, FTL, both, or forklift-only
+- **Active hours** — when this door is available for scheduling (e.g., Mon–Fri 06:00–18:00)
+- **Slot duration defaults** — default appointment length per appointment type
+- **Zone assignment** — which receiving zone this door feeds (used for putaway rule defaults)
+
+## Yard Calendar
+
+Navigate to **Receive → Yard Calendar** to manage your outdoor yard spaces. The Yard Calendar works similarly to the Dock Scheduler but tracks trailers parked in numbered yard positions.
+
+Use the Yard Calendar to:
+- Record when a trailer is dropped in a yard slot
+- Track which account and carrier the trailer belongs to
+- Monitor how long trailers have been sitting (detention tracking)
+- Move trailers from yard slots to dock doors when ready to receive
+
+<Tip>
+  Yard slot tracking is especially useful for drop-trailer operations where carriers leave trailers overnight. CoreX can alert you when a trailer has been in a yard slot longer than your configured detention-free period.
+</Tip>
+
+## Truck check-in and check-out
+
+When a truck arrives, check it in from the Dock Scheduler:
+
+1. Click on the appointment block on the calendar.
+2. Click **Check In**. Enter the actual arrival time (defaults to now), driver name, and vehicle/trailer number if not already filled in.
+3. The appointment status changes to **Arrived**. The linked RO (if any) is flagged as ready to start receiving.
+
+When the truck departs (loading/unloading complete):
+
+1. Click **Check Out** on the appointment.
+2. Enter actual departure time. CoreX calculates dwell time automatically.
+
+Check-in and check-out times are recorded for:
+- **Detention billing** — if dwell time exceeds the free period, a billable detention event is captured
+- **Dock performance reporting** — door utilization, average dwell time, on-time arrival rates
+
+## Appointment status lifecycle
+
+| Status | Description |
+|--------|-------------|
+| **Scheduled** | Appointment booked, awaiting truck arrival |
+| **Confirmed** | Appointment confirmed with carrier/driver |
+| **Arrived** | Truck has been checked in at the dock |
+| **In Progress** | Receiving or loading has started |
+| **Complete** | Truck has been checked out; all receiving/loading done |
+| **No Show** | Appointment time passed without truck arrival |
+| **Cancelled** | Appointment cancelled before truck arrival |
+
+## Notifications
+
+Configure appointment notifications in **Admin → System Parameters → Notifications**:
+
+- **Upcoming appointment reminder** — email/SMS to the driver or carrier X hours before the appointment
+- **Overdue notification** — alert to your dock supervisor when a truck hasn't arrived within Y minutes of its appointment time
+- **No-show alert** — notification when an appointment is marked as a no-show
+- **Detention warning** — alert when dwell time approaches or exceeds the free detention period
+
+## Reporting on dock performance
+
+The **Reports → Operations Control** dashboard includes dock-level KPIs:
+
+- Door utilization rate (booked hours / available hours)
+- On-time arrival rate by carrier and by account
+- Average receiving dwell time
+- No-show rate
+- Appointments per day / week by type
+
+These metrics help you optimize door assignments, staffing, and carrier relationships.

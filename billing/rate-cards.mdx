@@ -1,0 +1,163 @@
+---
+title: "Rate Cards"
+description: "Configure per-account pricing for every billable service. Rate cards define what you charge for receiving, storage, pick and pack handling, outbound shipping, and special services."
+icon: "sliders"
+---
+
+A **rate card** is a pricing schedule tied to a shipper account that defines what you charge for every type of service you provide. CoreX automatically applies the active rate card to capture billable events as warehouse operations occur — you don't need to manually record charges for standard services.
+
+## Rate card structure
+
+A rate card is organized into **charge categories**. Each category contains one or more **charge lines** — individual pricing rules for specific services.
+
+### Charge categories
+
+<AccordionGroup>
+  <Accordion title="Receiving">
+    Charges applied when inbound product is received. Common rate structures:
+
+    | Unit of Measure | Example Rate | Use Case |
+    |----------------|-------------|---------|
+    | Per pallet received | $12.00 / pallet | Standard pallet-in pricing |
+    | Per carton received | $1.50 / carton | For carton-level receiving |
+    | Per unit received | $0.15 / unit | For high-value, unit-counted items |
+    | Per receiving order | $25.00 / RO | Flat fee per shipment |
+    | Per labor hour | $45.00 / hour | Time-and-materials receiving |
+
+    You can combine multiple lines (e.g., $8.00 per pallet + $0.10 per unit) to build complex receiving fee structures.
+  </Accordion>
+  <Accordion title="Storage">
+    Charges for holding inventory over time. Storage is calculated based on daily position snapshots:
+
+    | Unit of Measure | Example Rate | Billing Frequency |
+    |----------------|-------------|-------------------|
+    | Per pallet position per day | $0.85 / pallet / day | Daily |
+    | Per pallet position per month | $22.00 / pallet / month | Monthly |
+    | Per cubic foot per month | $0.45 / cu ft / month | Monthly |
+    | Per unit per day | $0.005 / unit / day | Daily |
+
+    Set the **storage billing method** per account:
+    - **Daily** — charge is calculated each day based on that day's inventory snapshot
+    - **Weekly average** — charge based on the average daily pallet count for the week
+    - **Monthly peak** — charge based on the highest single-day pallet count during the month (less favorable for the shipper; check your contract)
+  </Accordion>
+  <Accordion title="Pick & Pack Handling">
+    Charges for order fulfillment labor:
+
+    | Charge Type | Example Rate |
+    |-------------|-------------|
+    | Per order (pick fee) | $2.50 / order |
+    | Per line picked | $0.35 / line |
+    | Per unit picked | $0.12 / unit |
+    | Per carton packed | $1.50 / carton |
+    | Packing materials | Pass-through or flat fee |
+    | Labels and inserts | $0.10 / insert |
+
+    A common structure: $2.00 per order + $0.25 per line + $0.08 per unit.
+  </Accordion>
+  <Accordion title="Outbound Shipping">
+    Charges for carrier labels and outbound shipment processing:
+
+    | Charge Type | Example Rate |
+    |-------------|-------------|
+    | Carrier rate pass-through | 100% pass-through (no markup) |
+    | Carrier rate with markup | Pass-through + 8% |
+    | Flat shipping fee | $5.00 / shipment |
+    | Handling fee | $1.25 / shipment |
+
+    For freight/LTL, configure separate rate structures or pass-through from your negotiated carrier rates.
+  </Accordion>
+  <Accordion title="Returns / RMA">
+    Charges for processing returned goods:
+
+    | Charge Type | Example Rate |
+    |-------------|-------------|
+    | Per return received | $5.00 / RMA |
+    | Per unit returned | $0.75 / unit |
+    | Return label (if provided) | Pass-through or flat fee |
+    | Return QC | $0.50 / unit inspected |
+    | Restocking | $0.25 / unit restocked |
+  </Accordion>
+  <Accordion title="Special Services">
+    Custom charge lines for one-off or account-specific services:
+
+    - Kitting / assembly: per kit assembled
+    - Relabeling: per unit labeled
+    - Repackaging: per unit repackaged
+    - Hazmat handling: per shipment surcharge
+    - Detention: per hour over free time
+    - Account setup fee: one-time flat charge
+
+    Special service lines can be set to **manual capture** (added by a supervisor) or **automatic capture** (triggered by a specific workflow event).
+  </Accordion>
+</AccordionGroup>
+
+## Creating a rate card
+
+Navigate to **Billing → Rate Cards** and click **New Rate Card**.
+
+<Steps>
+  <Step title="Name and assign the rate card">
+    Give the rate card a name (e.g., "ACME Standard 2025") and assign it to a shipper account. Set the **effective date** — the date from which this rate card applies.
+
+    You can create multiple rate cards per account (for different time periods or contract tiers) but only one can be **Active** at a time.
+  </Step>
+  <Step title="Set the billing currency and period">
+    - **Currency** — usually USD, but CoreX supports multi-currency billing
+    - **Billing period** — how often you invoice this account: weekly, bi-weekly, monthly, or on-demand
+    - **Payment terms** — Net 15, Net 30, Net 45, etc. (displayed on invoices)
+  </Step>
+  <Step title="Add charge lines by category">
+    For each charge category (Receiving, Storage, Pick & Pack, etc.), click **Add Charge Line**:
+    - Select the **service type** from the list
+    - Set the **unit of measure** (per pallet, per order, per unit, per hour, etc.)
+    - Enter the **rate** (dollar amount)
+    - Set any **minimums** (e.g., minimum $15.00 per receiving order, regardless of pallet count)
+    - Set any **tier breaks** for volume pricing (see below)
+  </Step>
+  <Step title="Configure storage settings">
+    In the Storage section, specify:
+    - Storage billing method (daily, weekly average, monthly peak)
+    - First-day and last-day charging rules
+    - Whether storage is charged in pallet positions, cubic feet, or units
+  </Step>
+  <Step title="Save and activate">
+    Save the rate card. Toggle it to **Active** to start capturing billable events against it. Any previously active rate card for this account is automatically deactivated.
+  </Step>
+</Steps>
+
+## Volume pricing (tiered rates)
+
+For accounts with high volume, you can configure tiered pricing on any charge line:
+
+Example receiving tiers:
+| Volume (pallets received / month) | Rate per pallet |
+|-----------------------------------|----------------|
+| 1 – 100 | $12.00 |
+| 101 – 500 | $10.00 |
+| 501+ | $8.00 |
+
+Click **Add Tier** on any charge line to configure tier breaks. CoreX applies the correct tier rate based on the monthly accumulated volume for that charge type.
+
+## Minimum charges
+
+Set a **monthly minimum** on the rate card — a minimum total that the account will be invoiced regardless of actual activity. If the sum of all billable events for the month is less than the minimum, the difference is added as a "Minimum Charge Adjustment" line on the invoice.
+
+Common 3PL practice is to set a monthly minimum that covers your fixed costs for that account (space, labor allocation, account management time).
+
+## Rate card versioning
+
+When you need to update pricing (annual rate increase, contract renewal), create a **new version** of the rate card rather than editing the current one:
+
+1. Open the current rate card → click **Duplicate**.
+2. Update the rate lines on the new version.
+3. Set the **effective date** to the new contract start date.
+4. Activate the new version.
+
+CoreX will automatically use the correct rate card version for each billing period based on the effective date. Historical invoices continue to reference the rate card that was active at the time.
+
+## Billing rate visibility
+
+Shippers can see a summary of their rate card in the **Seller Portal** → **Billing** section. You control exactly how much detail is visible — you can show rate card line items or just show the invoice totals.
+
+Configure Seller Portal billing visibility in **Admin → Branding → Seller Portal Settings**.

@@ -1,0 +1,136 @@
+---
+title: "Lot Management"
+description: "Track inventory at the lot level for traceability, FEFO rotation, expiration management, and regulatory compliance."
+icon: "tag"
+---
+
+**Lot management** in CoreX gives you full traceability for inventory that needs to be tracked below the SKU level — food and beverage, pharmaceuticals, cosmetics, regulated goods, and any product where the specific production batch matters. Every receipt, pick, pack, and return transaction is tied to a lot number, giving you a complete chain of custody from receipt to shipment.
+
+## Enabling lot tracking
+
+Lot tracking is enabled per item. Navigate to **Inventory → Items**, open an item record, and in the **Lot & Serial Tracking** section:
+
+- Toggle **Lot Tracking** on
+- Set **Expiration Date Required** if every lot must have an expiry date
+- Set the **Allocation Method**: FIFO, FEFO, or specific lot
+
+Once lot tracking is enabled on an item, all future transactions for that item require a lot number. Existing inventory without a lot number is assigned to a default "No Lot" lot record (which can be re-assigned later).
+
+## Lot records
+
+Each lot is a record in CoreX tied to a specific account, item, and lot number. Navigate to **Inventory → Lot Management** to view all lots.
+
+Each lot record shows:
+- **Lot number** — as received from the supplier or entered manually
+- **Item and account** it belongs to
+- **Expiration date** (if applicable)
+- **Manufactured date** (if captured)
+- **Supplier batch/PO reference**
+- **Total on-hand quantity** (summed across all locations)
+- **Available quantity** (on-hand minus allocated)
+- **Status** — Active, On Hold, Expired, Disposed
+
+Click a lot to see its full transaction history — every receipt, pick, and return that touched this lot.
+
+## Receiving lot-tracked inventory
+
+During **Scan to Receive**, if an item is lot-tracked, CoreX prompts the receiver to enter or scan the lot information before the item quantity is accepted:
+
+1. Scan the item barcode.
+2. CoreX shows a "Lot Required" prompt.
+3. Scan the lot number barcode on the product label (GS1-128 encoded) or enter manually.
+4. If expiry is required, scan or enter the expiration date.
+5. Enter the quantity.
+6. Proceed.
+
+Multiple lots can be received on the same receiving order line (e.g., a supplier ships 100 units from two different production batches). Scan each lot separately.
+
+## Lot allocation methods
+
+<Tabs>
+  <Tab title="FIFO (First In, First Out)">
+    CoreX allocates from the oldest lot first (by receipt date). When a shipping order is allocated, the lot received earliest is consumed before newer lots. Standard for most non-perishable goods.
+  </Tab>
+  <Tab title="FEFO (First Expired, First Out)">
+    CoreX allocates from the lot with the earliest expiration date first. Required for food, pharma, and other perishables. Ensures oldest product by expiry ships first, minimizing expired inventory write-offs.
+  </Tab>
+  <Tab title="Specific Lot">
+    A specific lot number is designated on the shipping order line item. CoreX allocates only from that lot. Used when a customer requests product from a specific production run, or for recall and compliance scenarios.
+  </Tab>
+</Tabs>
+
+Set the allocation method per item in the item record's **Lot & Serial Tracking** section. Override on specific orders by specifying a lot number on the shipping order line.
+
+## Expiration date management
+
+Navigate to **Inventory → Lot Aging** to monitor lots by expiration date. The view shows:
+
+- Lots expiring in the next 7, 30, and 90 days
+- Lots already expired (should not be in available status — CoreX flags these)
+- Days of supply remaining for each lot at current order velocity
+
+### Expiry alerts
+
+Configure expiry alerts in **Admin → System Parameters → Lot Management**:
+
+- **Approaching expiry alert** — notify account managers when a lot will expire within N days
+- **Expired inventory alert** — notify when a lot has passed its expiration date and still has on-hand quantity
+- **FEFO override warning** — alert when a FEFO-managed item has a pick allocated from a newer lot due to lot unavailability
+
+### Expired inventory handling
+
+When a lot passes its expiration date:
+1. CoreX automatically moves it to **Expired** status.
+2. Expired lots are excluded from new allocations.
+3. A supervisor must disposition the expired inventory: write-off, return to supplier, or (if applicable) re-date with regulatory approval.
+
+<Warning>
+  Do not leave expired inventory in Available status. CoreX prevents it from being allocated, but it still takes up storage space and may inflate on-hand reporting. Disposition expired lots promptly.
+</Warning>
+
+## Lot holds
+
+Place a hold on an entire lot to prevent it from being allocated (e.g., pending quality investigation or supplier dispute):
+
+1. Navigate to **Inventory → Lot Management** → open the lot.
+2. Click **Place Hold** → select a hold reason.
+3. All inventory in this lot across all locations moves to **On Hold** status.
+
+To release: click **Release Hold**. Inventory returns to Available.
+
+Lot holds are different from location holds (which hold all inventory in a specific location). Lot holds travel with the lot — if a lot is split across 5 locations, all 5 are held simultaneously.
+
+## Lot-level reporting and traceability
+
+CoreX provides full lot-level traceability for compliance purposes:
+
+### Forward trace
+"Where did this lot end up?" Starting from a received lot, CoreX traces forward through all pick, pack, and ship transactions to show which shipping orders included units from this lot, who received them, and when they were delivered.
+
+Navigate to a lot record → click **Forward Trace**.
+
+### Backward trace
+"Where did this product come from?" Starting from a shipping order or tracking number, CoreX traces back through pack, pick, and allocation to identify the specific lot number(s) included in that shipment.
+
+Navigate to a shipping order → **Line Items** tab → click **Trace Lot**.
+
+### Recall management
+In a product recall scenario:
+
+1. Search for the lot number(s) to recall in **Inventory → Lot Management**.
+2. Place a hold on the lot immediately to stop any further shipments.
+3. Run a **Forward Trace** to identify all orders that shipped this lot.
+4. Export the list of affected customers/orders for your recall notification process.
+5. Create return RMAs for recalled units already shipped.
+
+The forward trace report can be exported as CSV or PDF for regulatory submission.
+
+## Serial number tracking
+
+For items requiring per-unit serialization (electronics, high-value goods, firearms, medical devices), enable **Serial Tracking** on the item record. With serial tracking:
+
+- Every individual unit has a unique serial number recorded at receipt
+- Each pick, pack, and ship transaction records the specific serial number
+- Returns are matched to the original shipped serial number
+
+Serial tracking provides the strongest traceability but requires a scan per unit at every step, which slows throughput. Use it only where regulatory or warranty requirements demand it.

@@ -1,0 +1,114 @@
+---
+title: "Admin & Settings Overview"
+description: "Configure CoreX for your warehouse — locations, rules, carriers, users, integrations, and system behavior. Everything your warehouse admin needs."
+icon: "gear"
+---
+
+The **Admin** section is where warehouse administrators configure CoreX's behavior, rules, and integrations. Most settings here need to be configured once and then rarely touched — but they drive everything that happens in the warehouse day to day.
+
+<Warning>
+  Admin access is restricted to users with the **Admin** role. Most settings in this section affect live operations — changes take effect immediately. Test configuration changes in a non-production environment when possible, or make changes during off-peak hours.
+</Warning>
+
+## Admin modules
+
+<CardGroup cols={2}>
+  <Card title="Users & Roles" icon="users" href="/admin/users-and-roles">
+    Manage team members, assign roles, and configure permissions.
+  </Card>
+  <Card title="Rules" icon="list-check" href="/admin/rules">
+    Configure putaway rules, allocation rules, and carrier rules that drive automated decisions.
+  </Card>
+  <Card title="System Parameters" icon="sliders" href="/admin/system-parameters">
+    Global system settings: units of measure, time zones, tolerance thresholds, and operational defaults.
+  </Card>
+  <Card title="Carriers" icon="truck" href="/integrations/channels">
+    Connect carrier accounts and configure service levels.
+  </Card>
+  <Card title="Integrations" icon="plug" href="/integrations/overview">
+    Connect channels, EDI partners, and third-party systems.
+  </Card>
+  <Card title="Warehouse Layout" icon="warehouse" href="/inventory/locations">
+    Manage locations, zones, dock doors, and yard positions.
+  </Card>
+</CardGroup>
+
+## Quick navigation
+
+| Area | Navigate to | Description |
+|------|------------|-------------|
+| Users | Admin → Team Members | Add users, assign roles, manage access |
+| Putaway Rules | Admin → Putaway Rules | Where to put product after receiving |
+| Allocation Rules | Admin → Allocation Rules | How to allocate inventory to orders |
+| Carrier Rules | Admin → Carrier Rules | Which carriers to use per account/condition |
+| Carrier Setup | Admin → Carriers | Connect carrier API accounts |
+| Rate Tariffs | Admin → Rate Tariffs | Carrier rate tables for freight/LTL |
+| System Parameters | Admin → System Parameters | Global operational settings |
+| Sequences | Admin → Sequences | Auto-numbering for ROs, SOs, etc. |
+| Inbound/Outbound Types | Admin → Inbound/Outbound Types | Custom document types |
+| Service Classes | Admin → Service Classes | Carrier service level definitions |
+| Pipeline Config | Admin → Pipeline Config | Auto-wave rules, auto-allocation, batch settings |
+| Cutoff Times | Admin → Cutoff Times | Carrier cutoff schedules |
+| Dock Doors | Admin → Dock Doors | Physical dock door configuration |
+| Equipment | Admin → Equipment | Forklifts, carts, scanners |
+| Warehouse Terminals | Admin → Warehouse Terminals | Mobile terminals and printers |
+| Cartonization Config | Admin → Cartonization Config | Box size library and cartonization rules |
+| Hazmat | Admin → Hazmat | Hazardous materials handling configuration |
+| Branding | Admin → Branding | Logo, colors, Seller Portal appearance |
+| Security | Admin → Security | SSO, IP allowlisting, password policies |
+| API Keys | Admin → API Keys | Manage API access keys |
+| Webhooks | Admin → Webhooks | Manage webhook subscriptions |
+| EDI Processing | Admin → EDI Processing | EDI trading partner configuration |
+| Integration Store | Admin → Integration Store | Connect channels and apps |
+| Import | Admin → Import | Bulk import locations, items, orders |
+| Data Tools | Admin → Data Tools | Data export, bulk operations, audit logs |
+| Company Profile | Admin → Company Profile | Your 3PL's name, address, logo |
+| Subscription & Billing | Admin → Subscription & Billing | Your CoreX subscription and plan |
+
+## Recommended setup order
+
+If you're setting up CoreX from scratch, work through Admin configuration in this order to avoid dependency issues:
+
+<Steps>
+  <Step title="Company Profile">
+    Set your name, address, and time zone first — other settings depend on it.
+  </Step>
+  <Step title="Locations and Zones">
+    Define your warehouse location structure (Inventory → Locations).
+  </Step>
+  <Step title="System Parameters">
+    Set global defaults: units of measure, tolerance thresholds, and operational flags.
+  </Step>
+  <Step title="Sequences">
+    Configure auto-numbering formats for receiving orders, shipping orders, and other documents.
+  </Step>
+  <Step title="Carriers">
+    Connect your carrier accounts (Admin → Carriers).
+  </Step>
+  <Step title="Putaway and Allocation Rules">
+    Configure where product goes after receiving and how inventory is reserved for orders.
+  </Step>
+  <Step title="Cartonization Config">
+    Add your carton library if you're using automated carton selection.
+  </Step>
+  <Step title="Team Members">
+    Add your users and assign roles (Admin → Team Members).
+  </Step>
+  <Step title="Accounts and Rate Cards">
+    Set up shipper accounts (Customers → Accounts) and their rate cards (Billing → Rate Cards).
+  </Step>
+  <Step title="Integrations">
+    Connect channels (Shopify, Amazon) and EDI partners (Admin → Integration Store, EDI Processing).
+  </Step>
+</Steps>
+
+## Audit logging
+
+CoreX maintains a complete audit log of all Admin configuration changes. Navigate to **Admin → Data Tools → Audit Log** to review:
+
+- What setting was changed
+- What the old value was and what the new value is
+- Which user made the change
+- When the change was made
+
+The audit log is retained for 2 years and is read-only — it cannot be edited or deleted.

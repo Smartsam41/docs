@@ -1,0 +1,159 @@
+---
+title: "Invoicing"
+description: "Generate, review, and send invoices. Manage billing transactions, handle disputes, and track payment status across all your shipper accounts."
+icon: "file-invoice"
+---
+
+CoreX's invoicing module turns the billable events captured during warehouse operations into accurate, professional invoices. The process is designed for speed: at billing time, all events are already collected and organized — you review, adjust if needed, finalize, and send.
+
+## Viewing invoices
+
+Navigate to **Billing → Invoices** to see all invoices. Filter by:
+- **Account** — view invoices for a specific shipper
+- **Status** — Draft, Finalized, Sent, Paid, Overdue, Disputed
+- **Billing period** — filter by invoice period date range
+- **Invoice number** — search for a specific invoice
+
+Click any invoice to open the detail view, which shows all line items, the billable events that back each line, and the payment status.
+
+## Generating an invoice
+
+<Steps>
+  <Step title="Navigate to Billing → Invoices">
+    Click **Generate Invoice**.
+  </Step>
+  <Step title="Select the account and billing period">
+    Choose:
+    - **Account** — which shipper to invoice
+    - **Billing period start and end date** — the period to invoice. CoreX will include all unbilled transactions with an event date within this range.
+
+    CoreX shows a **preview** of what will be included: total transaction count, estimated total, and a breakdown by charge category.
+  </Step>
+  <Step title="Review and generate">
+    Click **Generate**. CoreX creates a **Draft** invoice containing:
+    - All billable event transactions for the period, rolled up by charge type
+    - Storage charges calculated for the period
+    - Any manually added billing transactions
+    - Applied minimum charges (if the subtotal is below the account's monthly minimum)
+    - Applicable taxes (if configured)
+  </Step>
+  <Step title="Review the draft">
+    Open the draft invoice and review:
+    - **Summary section** — total by charge category
+    - **Line items** — each charge line with quantity, rate, and amount
+    - **Transaction detail** — click any line item to see the individual events that make up that line (e.g., click "Pick Fees" to see each order's pick charge)
+
+    If anything looks wrong, you can:
+    - Edit a line item's quantity or rate (with an audit note)
+    - Add a manual credit or additional charge
+    - Remove a specific transaction from this invoice and move it to the next period
+  </Step>
+  <Step title="Finalize the invoice">
+    When the invoice is correct, click **Finalize**. The invoice is locked — no further edits without voiding and regenerating. All transactions included in this invoice are marked as **Billed** so they won't appear on the next invoice.
+  </Step>
+  <Step title="Send to the shipper">
+    Click **Send Invoice**. Options:
+    - **Email** — send a PDF of the invoice to the account's billing contact email(s)
+    - **Seller Portal** — make it visible in the shipper's Seller Portal (always available; email is optional)
+    - **Download PDF** — download the invoice PDF to send via your own process
+
+    The invoice status changes to **Sent**.
+  </Step>
+</Steps>
+
+## Invoice statuses
+
+| Status | Description |
+|--------|-------------|
+| **Draft** | Invoice generated but not finalized. Editable. |
+| **Finalized** | Locked and ready to send. Not yet delivered to the shipper. |
+| **Sent** | Delivered to the shipper via email or portal. |
+| **Paid** | Payment confirmed. |
+| **Overdue** | Past payment due date and not paid. |
+| **Disputed** | Shipper has raised a dispute on one or more line items. |
+| **Voided** | Invoice cancelled. All included transactions are returned to unbilled status. |
+
+## Billing transactions
+
+Navigate to **Customers → Billing Transactions** (or from an account's detail page → **Billing** tab) to see the raw event-level detail.
+
+Each billing transaction record shows:
+- **Event type** — what happened (receive, pick, pack, store, etc.)
+- **Event date** — when it occurred
+- **Reference** — the linked receiving order, shipping order, or other document
+- **Quantity** — how many units, pallets, orders, etc.
+- **Rate** — the rate applied from the rate card
+- **Amount** — quantity × rate
+- **Status** — Unbilled, Billed (on a specific invoice), or Credited
+
+### Filtering and exporting transactions
+
+Use the filter tools to narrow transactions by:
+- Date range
+- Charge type
+- Status (unbilled only, to see what will be on the next invoice)
+- Reference document
+
+Export any transaction view to CSV for reconciliation or audit purposes.
+
+## Handling disputes
+
+When a shipper disputes an invoice:
+
+1. Navigate to the invoice → click **Mark as Disputed**.
+2. Select the disputed line items and enter the dispute reason.
+3. The invoice moves to **Disputed** status.
+
+To resolve:
+- **Issue a credit memo** — create a credit for the disputed amount and apply it to the account's next invoice
+- **Void and reissue** — void the invoice, adjust the transactions, and regenerate
+- **Resolve with no change** — document the outcome and mark the dispute as resolved if the charge was correct
+
+Credit memos are tracked separately and appear in the **Billing Transactions** list as negative amounts.
+
+## Credit memos
+
+Create a credit memo from **Billing → Invoices → New Credit Memo**:
+- Select the account
+- Enter the credit amount and reason
+- Optionally link to the invoice being credited
+
+The credit memo is applied automatically to the account's next generated invoice, reducing the total due.
+
+## Payment tracking
+
+Mark invoices as paid from the invoice detail page → click **Record Payment**:
+- Enter the **payment date**, **payment method** (ACH, check, wire, credit card), and **reference number**
+- The invoice moves to **Paid** status
+- Payment is recorded in the account's payment history
+
+CoreX does not process payments directly — it tracks payment status. Connect your accounting system (QuickBooks, NetSuite, Xero) via the API or use the export tools to sync invoices and payments.
+
+## Automated invoice generation
+
+For large numbers of accounts, manually generating invoices at the end of each billing period is time-consuming. Use **Scheduled Invoice Generation** (**Admin → System Parameters → Billing**) to have CoreX automatically generate draft invoices on the billing period end date for each account.
+
+The drafts are available for review in **Billing → Invoices** the next morning. Review and finalize before sending.
+
+<Note>
+  Automated generation creates **Draft** invoices only. You always have a review step before finalizing and sending. CoreX never sends an invoice automatically without supervisor approval.
+</Note>
+
+## Invoice customization
+
+Customize the invoice PDF appearance from **Admin → Branding**:
+- Upload your logo
+- Set your company name, address, and payment instructions
+- Add a custom footer message
+- Configure which fields are shown on the invoice (you can hide rate card rate details if preferred)
+
+Invoice PDFs are professional, print-ready documents suitable for emailing to your shipper accounts.
+
+## Accounting integrations
+
+Export invoices and transactions for your accounting system:
+- **QuickBooks export** — export finalized invoices in QuickBooks-compatible format
+- **CSV export** — export transactions in flat format for any accounting system
+- **API** — pull invoice and transaction data via the CoreX REST API for custom integrations
+
+See [API Reference](/integrations/api) for invoice and transaction API endpoints.

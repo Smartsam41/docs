@@ -1,0 +1,110 @@
+---
+title: "Inventory Overview"
+description: "How CoreX tracks inventory — by account, location, lot, and unit of measure. From live stock on hand to cycle counts, holds, and demand forecasting."
+icon: "warehouse"
+---
+
+Inventory management is at the core of CoreX. Every unit in your warehouse is tracked in real time: which account it belongs to, exactly where it is, what lot it came from, and what its status is. CoreX maintains a full transaction history for every inventory movement — received, moved, picked, packed, adjusted, counted — so you always have a complete audit trail.
+
+## Core inventory concepts
+
+**Account-level segregation** — Inventory is always attributed to a shipper account. Two accounts can store the same SKU in the same warehouse, and CoreX tracks them completely separately. A picker working on Account A's order will never be directed to pick Account B's inventory.
+
+**Location-level tracking** — Every unit of inventory has a location. CoreX knows exactly which bin, shelf, or pallet position each unit is in at all times. When inventory moves (via putaway, replenishment, or a pick), the location is updated immediately via scan confirmation.
+
+**Lot and serial tracking** — For items that require traceability, CoreX tracks inventory at the lot number level (and optionally at the serial number level). Lot-tracked inventory can use FIFO, FEFO, or specific-lot allocation.
+
+**Status flags** — Inventory can be in one of several statuses: Available, On Hold, Quarantine, Allocated (reserved for an order), Damaged, or Expired. Only Available inventory is eligible for new allocations.
+
+## Key screens
+
+<CardGroup cols={2}>
+  <Card title="Items / SKUs" icon="cube" href="/inventory/items-skus">
+    The item master: create and manage SKU records, barcodes, dimensions, weights, and lot settings.
+  </Card>
+  <Card title="Locations" icon="map-pin" href="/inventory/locations">
+    Define and manage warehouse locations, zones, capacity, and location types.
+  </Card>
+  <Card title="Cycle Counts" icon="clipboard-check" href="/inventory/cycle-counts">
+    Schedule and run cycle counts to verify on-hand quantities without shutting down the warehouse.
+  </Card>
+  <Card title="Lot Management" icon="tag" href="/inventory/lot-management">
+    Track lot numbers, expiration dates, and lot-level holds and dispositions.
+  </Card>
+  <Card title="Replenishment" icon="arrow-up-from-bracket" href="/inventory/replenishment">
+    Automatically replenish forward pick locations from bulk storage when quantities fall below threshold.
+  </Card>
+  <Card title="Stock on Hand" icon="chart-bar" href="/inventory/items-skus#stock-on-hand">
+    Real-time inventory levels by account, SKU, location, and lot.
+  </Card>
+</CardGroup>
+
+## Inventory views
+
+CoreX offers multiple ways to view inventory:
+
+<Tabs>
+  <Tab title="Stock on Hand">
+    Navigate to **Inventory → Stock on Hand** for a summary view by account and SKU. Shows total on-hand, allocated, available, and on-hold quantities for each item. Filter by account, SKU, location, or lot.
+  </Tab>
+  <Tab title="By Location">
+    Navigate to **Inventory → By Location** to see what's stored in each warehouse location. Useful for space planning and auditing location contents.
+  </Tab>
+  <Tab title="SKU Lookup">
+    Navigate to **Inventory → SKU Lookup** for a quick search by SKU or barcode. Shows all locations where that SKU is stored across all accounts.
+  </Tab>
+  <Tab title="Lot Aging">
+    Navigate to **Inventory → Lot Aging** to see inventory sorted by age or expiration date. Identify lots approaching expiry and take action before product is unsellable.
+  </Tab>
+</Tabs>
+
+## Inventory transaction types
+
+Every change to inventory levels is recorded as a transaction. Transaction types include:
+
+| Type | Trigger |
+|------|---------|
+| Receipt | Product received via scan-to-receive |
+| Putaway | Inventory moved to a storage location after receiving |
+| Pick | Inventory removed from a location during order picking |
+| Pack | Inventory confirmed into a shipping carton |
+| Return Receipt | Returned goods added back to inventory |
+| Transfer | Inventory moved between locations (not order-related) |
+| Adjustment | Manual inventory correction by a supervisor |
+| Cycle Count | Inventory corrected based on a cycle count result |
+| Replenishment | Inventory moved from bulk to forward pick location |
+| Write-Off | Inventory removed due to damage, expiry, or disposal |
+| Hold | Inventory moved to hold status |
+| Hold Release | Hold lifted; inventory returned to available |
+
+All transactions are viewable in **Inventory → Stock on Hand** → select an item → **Transaction History** tab.
+
+## Holds
+
+Place a **Hold** on inventory to prevent it from being allocated or picked. Common use cases:
+- QC hold after receiving
+- Customer dispute or pending investigation
+- Regulatory or compliance hold
+- Batch recall
+
+Navigate to **Inventory → Holds** to create a hold. Specify:
+- Account and SKU (and optionally lot and location)
+- Hold reason code
+- Quantity to hold (or hold all)
+- Expiry date (optional — hold auto-releases after this date)
+
+Held inventory is visible in Stock on Hand but excluded from available quantity.
+
+## Demand forecasting
+
+Navigate to **Inventory → Demand Forecast** for a forward-looking view of inventory needs. CoreX analyzes historical order velocity by account and SKU to project:
+
+- Expected units shipped per day/week/month
+- Days of supply remaining at current on-hand
+- Recommended reorder point and reorder quantity
+
+Demand forecasts are visible to shipper accounts in the Seller Portal (if enabled), helping them plan inbound replenishment shipments before you run out of stock.
+
+<Note>
+  Demand forecasting uses 90 days of historical order data by default. Accounts with less history will show lower-confidence forecasts. The forecast confidence level is shown alongside each projection.
+</Note>

@@ -1,0 +1,128 @@
+---
+title: "QC Inspections"
+description: "Configure quality control checklists for inbound product, run inspections at the dock, and manage disposition decisions for failed units."
+icon: "magnifying-glass"
+---
+
+**QC Inspections** let you enforce quality checks on inbound product before it enters available inventory. You can configure inspection requirements by account, by item category, or by inbound type — and define exactly what your QC team should check for each situation. Units that fail inspection can be quarantined, returned to the supplier, or accepted with a note.
+
+## How QC fits into receiving
+
+QC inspection happens **after scanning** and **before putaway**. When a receiving order has QC-required lines, those lines are held in **QC Hold** status after scanning completes. The RO moves to **QC Hold** status overall until all required inspections are signed off.
+
+Inspection can be performed by the same person doing receiving, or by a dedicated QC role — configurable per account in **Admin → System Parameters**.
+
+## Configuring QC requirements
+
+Navigate to **Admin → System Parameters → QC Settings** to configure when QC is required:
+
+<AccordionGroup>
+  <Accordion title="By Account">
+    Enable QC for all inbound shipments from a specific account. Useful when a shipper requires 100% inspection of all received goods.
+  </Accordion>
+  <Accordion title="By Item or Item Category">
+    Require QC for specific SKUs or item categories (e.g., high-value items, fragile items, regulated products). Configure this from the item record in **Inventory → Items**.
+  </Accordion>
+  <Accordion title="By Inbound Type">
+    Require QC for specific inbound types — for example, always inspect Returns but skip QC for standard replenishment POs.
+  </Accordion>
+  <Accordion title="By Supplier">
+    Require QC for shipments from specific suppliers. This is useful when a supplier has a history of quality issues — you can flag them for mandatory inspection without affecting other suppliers for the same account.
+  </Accordion>
+  <Accordion title="Random Sampling">
+    Configure a sampling rate (e.g., inspect 10% of units, or inspect 1 carton per pallet). CoreX will randomly flag the appropriate units for inspection after scanning and skip the rest.
+  </Accordion>
+</AccordionGroup>
+
+## Building inspection checklists
+
+Go to **Admin → System Parameters → QC Checklists** to create reusable checklists. Each checklist contains one or more **inspection items** — questions or checks that the QC inspector must answer.
+
+Each inspection item has:
+- **Description** — what to check (e.g., "Check for visible damage to packaging")
+- **Response type** — Pass/Fail, Yes/No, Number (for measurements), or Free text
+- **Required** — whether a response is mandatory before the checklist can be submitted
+- **Fail action** — what happens if this item fails: Quarantine, Flag for Review, or Allow with Note
+
+Assign checklists to accounts, item categories, or inbound types. You can have multiple checklists active simultaneously — CoreX will prompt for all applicable checklists.
+
+### Example checklist: Returns QC
+
+| # | Check | Response Type | Fail Action |
+|---|-------|---------------|-------------|
+| 1 | Original packaging intact? | Pass/Fail | Flag for Review |
+| 2 | Product undamaged? | Pass/Fail | Quarantine |
+| 3 | All components/accessories present? | Pass/Fail | Flag for Review |
+| 4 | Unit powers on / functional? | Pass/Fail | Quarantine |
+| 5 | Notes | Free text | — |
+
+## Running an inspection
+
+To perform a QC inspection:
+
+<Steps>
+  <Step title="Open the inspection queue">
+    Navigate to **Receive → QC Inspections** to see all RO lines currently in QC Hold. You can filter by account, item, and date.
+
+    Alternatively, open an RO in QC Hold status and click the **QC** tab to see which lines need inspection.
+  </Step>
+  <Step title="Start the inspection">
+    Click **Start Inspection** on a line item. Select the checklist to use (CoreX may pre-select it if there's only one applicable checklist).
+
+    On a mobile terminal, the inspector scans the item barcode and the checklist appears.
+  </Step>
+  <Step title="Work through the checklist">
+    Answer each item in the checklist. For Pass/Fail questions, tap Pass or Fail. For numeric items, enter the measurement. Add photos using the **Attach Photo** button for any item.
+
+    Each failed item triggers the configured **fail action** immediately — the inspector sees a prompt to confirm quarantine or flag.
+  </Step>
+  <Step title="Submit the inspection">
+    When all required items are answered, tap **Submit Inspection**. CoreX records:
+    - Inspector user ID and timestamp
+    - All responses
+    - Overall pass/fail result
+    - Any photos attached
+
+    The RO line moves out of QC Hold.
+  </Step>
+  <Step title="Disposition failed units">
+    Units flagged for **Quarantine** are moved to a quarantine location (configured in **Admin → Locations**). They are excluded from available inventory until a supervisor makes a disposition decision:
+    - **Accept** — move to available inventory despite the failure
+    - **Rework** — create a work order for rework/repackaging
+    - **Return to Supplier** — generate a return shipment
+    - **Dispose** — write off the units as a loss
+  </Step>
+</Steps>
+
+## Viewing inspection results
+
+Inspection results are viewable from multiple places:
+
+- **RO detail page → QC tab** — results for a specific shipment
+- **Receive → QC Inspections** — all inspections across all ROs, filterable by account, date, result, and inspector
+- **Customers → Supplier Scorecards** — aggregated QC pass rates by supplier over time
+
+<Tip>
+  Use Supplier Scorecards to identify vendors with chronic quality issues. You can set a QC failure rate threshold that triggers automatic notifications to your account managers.
+</Tip>
+
+## Inspection reports
+
+From **Reports → Report Generator**, you can run QC inspection reports that show:
+
+- Pass/fail rates by account, item, supplier, or date range
+- Most common failure reasons
+- Inspector productivity (inspections per hour)
+- Units in quarantine by age
+
+These reports are also accessible to shipper accounts through the Seller Portal if enabled.
+
+## QC and billing
+
+If your rate card includes a QC inspection fee, CoreX captures the billable event when an inspection is completed. The fee can be:
+- Per unit inspected
+- Per carton inspected
+- Per RO inspected
+- Per hour (enter time manually on the inspection record)
+
+Configure QC billing rates in **Billing → Rate Cards**.

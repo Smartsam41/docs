@@ -1,0 +1,98 @@
+{
+  "name": "CoreX WMS",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.ico",
+  "colors": {
+    "primary": "#2563eb",
+    "light": "#3b82f6",
+    "dark": "#1d4ed8"
+  },
+  "topbarLinks": [
+    {
+      "name": "App",
+      "url": "https://corexwms.com/app"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Get Started",
+    "url": "https://corexwms.com/app"
+  },
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "quickstart"
+      ]
+    },
+    {
+      "group": "Receiving",
+      "pages": [
+        "receiving/overview",
+        "receiving/receiving-orders",
+        "receiving/scan-to-receive",
+        "receiving/qc-inspections",
+        "receiving/appointments"
+      ]
+    },
+    {
+      "group": "Shipping",
+      "pages": [
+        "shipping/overview",
+        "shipping/shipping-orders",
+        "shipping/waves",
+        "shipping/scanning",
+        "shipping/labels-and-rates",
+        "shipping/returns"
+      ]
+    },
+    {
+      "group": "Inventory",
+      "pages": [
+        "inventory/overview",
+        "inventory/items-skus",
+        "inventory/locations",
+        "inventory/cycle-counts",
+        "inventory/lot-management",
+        "inventory/replenishment"
+      ]
+    },
+    {
+      "group": "Customers & Billing",
+      "pages": [
+        "billing/overview",
+        "billing/rate-cards",
+        "billing/invoicing"
+      ]
+    },
+    {
+      "group": "Reports & Analytics",
+      "pages": [
+        "reports/overview"
+      ]
+    },
+    {
+      "group": "Admin & Settings",
+      "pages": [
+        "admin/overview",
+        "admin/users-and-roles",
+        "admin/rules",
+        "admin/system-parameters"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "integrations/overview",
+        "integrations/api",
+        "integrations/webhooks",
+        "integrations/edi",
+        "integrations/channels"
+      ]
+    }
+  ],
+  "footerSocials": {}
+}

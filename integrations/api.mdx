@@ -1,0 +1,274 @@
+---
+title: "REST API"
+description: "Full programmatic access to CoreX. Authenticate with a Bearer token, manage orders, inventory, and accounts, and build custom integrations."
+icon: "code"
+---
+
+The CoreX REST API gives you full programmatic access to your warehouse data. Create and manage shipping orders, query real-time inventory, receive webhooks on key events, and build custom integrations with your ERP, OMS, or any other system. The API follows REST conventions, uses JSON for all request and response bodies, and authenticates with Bearer tokens.
+
+## Base URL
+
+```
+https://api.corexwms.com/v1
+```
+
+All requests must be made over HTTPS. HTTP requests are rejected.
+
+## Authentication
+
+CoreX uses **API key Bearer token** authentication. Include your API key in the `Authorization` header on every request:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+### Generating an API key
+
+1. Navigate to **Admin → API Keys** in the CoreX app.
+2. Click **New API Key**.
+3. Give the key a descriptive name (e.g., "Production ERP Integration").
+4. Optionally set an expiry date and restrict to specific IP addresses.
+5. Choose the permission scope:
+   - **Read Only** — can query data but cannot create or modify
+   - **Full Access** — can read and write all resources
+   - **Custom** — select specific resources and operations
+6. Click **Create** and copy the key. **It is shown only once.**
+
+<Warning>
+  Treat API keys like passwords. Do not commit them to source control or embed them in client-side code. Store them in environment variables or a secrets manager. If a key is compromised, revoke it immediately from **Admin → API Keys** and generate a new one.
+</Warning>
+
+### Key scoping
+
+For principle of least privilege, scope your API key to only the resources your integration needs:
+
+```
+orders:read          Read shipping orders
+orders:write         Create and update shipping orders
+inventory:read       Read inventory levels and item data
+inventory:write      Adjust inventory and manage items
+receiving:read       Read receiving orders
+receiving:write      Create and update receiving orders
+billing:read         Read billing data and invoices
+webhooks:manage      Create and delete webhook subscriptions
+```
+
+## Rate limits
+
+| Tier | Requests per minute | Burst |
+|------|--------------------|----|
+| Standard | 300 | 500 |
+| High volume | 1,000 | 2,000 |
+
+Rate limit headers are included on every response:
+
+```http
+X-RateLimit-Limit: 300
+X-RateLimit-Remaining: 247
+X-RateLimit-Reset: 1715100060
+```
+
+When the rate limit is exceeded, the API returns `429 Too Many Requests`. Retry after the `X-RateLimit-Reset` timestamp.
+
+## Request format
+
+All request bodies are JSON. Include the `Content-Type: application/json` header on POST and PATCH requests.
+
+```http
+POST /v1/shipping-orders
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+
+{
+  "account_id": "acc_01HFGH3K2M",
+  "ship_to": {
+    "name": "Jane Smith",
+    "address1": "123 Main St",
+    "city": "Austin",
+    "state": "TX",
+    "zip": "78701",
+    "country": "US"
+  },
+  "service_level": "ground",
+  "requested_ship_date": "2026-05-08",
+  "lines": [
+    {
+      "sku": "TSHIRT-BLK-L",
+      "quantity": 2
+    }
+  ],
+  "reference": "ORD-98765"
+}
+```
+
+## Response format
+
+All responses are JSON. Successful responses return `200 OK`, `201 Created`, or `204 No Content`.
+
+```json
+{
+  "id": "so_01HFXR8A4N",
+  "account_id": "acc_01HFGH3K2M",
+  "status": "ready",
+  "reference": "ORD-98765",
+  "ship_to": {
+    "name": "Jane Smith",
+    "address1": "123 Main St",
+    "city": "Austin",
+    "state": "TX",
+    "zip": "78701",
+    "country": "US"
+  },
+  "service_level": "ground",
+  "requested_ship_date": "2026-05-08",
+  "lines": [
+    {
+      "id": "sol_01HFXR8B2P",
+      "sku": "TSHIRT-BLK-L",
+      "quantity": 2,
+      "allocated_quantity": 2,
+      "status": "allocated"
+    }
+  ],
+  "created_at": "2026-05-07T14:32:10Z",
+  "updated_at": "2026-05-07T14:32:10Z"
+}
+```
+
+## Error responses
+
+Errors follow a consistent format:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "ship_to.zip is required",
+    "field": "ship_to.zip"
+  }
+}
+```
+
+Common error codes:
+
+| HTTP Status | Error Code | Description |
+|------------|------------|-------------|
+| 400 | `VALIDATION_ERROR` | Request body is missing required fields or has invalid values |
+| 401 | `UNAUTHORIZED` | Missing or invalid API key |
+| 403 | `FORBIDDEN` | API key lacks permission for this operation |
+| 404 | `NOT_FOUND` | Resource not found |
+| 409 | `CONFLICT` | Resource already exists (e.g., duplicate order reference) |
+| 422 | `UNPROCESSABLE` | Valid request but business rule prevents the action |
+| 429 | `RATE_LIMITED` | Too many requests |
+| 500 | `SERVER_ERROR` | Unexpected server error |
+
+## Core endpoints
+
+### Shipping Orders
+
+```
+GET    /v1/shipping-orders              List shipping orders
+POST   /v1/shipping-orders              Create a shipping order
+GET    /v1/shipping-orders/{id}         Get a shipping order
+PATCH  /v1/shipping-orders/{id}         Update a shipping order
+DELETE /v1/shipping-orders/{id}         Cancel a shipping order
+GET    /v1/shipping-orders/{id}/labels  Get labels for an order
+POST   /v1/shipping-orders/{id}/hold    Place an order on hold
+POST   /v1/shipping-orders/{id}/release Release an order from hold
+```
+
+### Receiving Orders
+
+```
+GET    /v1/receiving-orders             List receiving orders
+POST   /v1/receiving-orders             Create a receiving order
+GET    /v1/receiving-orders/{id}        Get a receiving order
+PATCH  /v1/receiving-orders/{id}        Update a receiving order
+POST   /v1/receiving-orders/{id}/close  Close a receiving order
+```
+
+### Inventory
+
+```
+GET    /v1/inventory                    Query inventory (stock on hand)
+GET    /v1/inventory/items              List items / SKUs
+POST   /v1/inventory/items              Create an item
+GET    /v1/inventory/items/{id}         Get an item
+PATCH  /v1/inventory/items/{id}         Update an item
+POST   /v1/inventory/adjustments        Create an inventory adjustment
+GET    /v1/inventory/locations          List locations
+```
+
+### Accounts
+
+```
+GET    /v1/accounts                     List shipper accounts
+GET    /v1/accounts/{id}                Get account details
+```
+
+### Webhooks
+
+```
+GET    /v1/webhooks                     List webhook subscriptions
+POST   /v1/webhooks                     Create a webhook subscription
+DELETE /v1/webhooks/{id}                Delete a webhook subscription
+```
+
+## Pagination
+
+List endpoints are paginated. Pass `limit` (max 100, default 50) and `cursor` parameters:
+
+```http
+GET /v1/shipping-orders?limit=50&cursor=so_01HFXR8A4N
+```
+
+The response includes pagination metadata:
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "has_more": true,
+    "next_cursor": "so_01HFZZ9B5Q",
+    "total_count": 342
+  }
+}
+```
+
+## Filtering
+
+Most list endpoints support filters via query parameters:
+
+```http
+GET /v1/shipping-orders?account_id=acc_01HFGH3K2M&status=ready&ship_date_from=2026-05-01
+```
+
+Common filters:
+- `account_id` — filter by shipper account
+- `status` — filter by document status
+- `created_from` / `created_to` — date range for creation time
+- `updated_since` — items updated after a specific timestamp (useful for polling for changes)
+
+## Idempotency
+
+For POST requests that create resources, pass an `Idempotency-Key` header to safely retry failed requests without creating duplicates:
+
+```http
+Idempotency-Key: unique-request-id-from-your-system
+```
+
+If a request with the same idempotency key has already been processed, CoreX returns the original response instead of creating a new resource.
+
+## Sandbox environment
+
+Use the sandbox environment for development and testing:
+
+```
+https://api-sandbox.corexwms.com/v1
+```
+
+Sandbox API keys are generated separately from **Admin → API Keys** (toggle "Sandbox" when creating). Sandbox data is completely isolated from production.
+
+<Tip>
+  Use the sandbox to test webhook delivery, order creation, and inventory queries before going live. The sandbox environment resets weekly.
+</Tip>

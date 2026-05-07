@@ -1,0 +1,124 @@
+---
+title: "Replenishment"
+description: "Automatically refill forward pick locations from bulk storage when quantities fall below threshold. Keep your pick face full and your pickers moving."
+icon: "arrow-up-from-bracket"
+---
+
+**Replenishment** is the process of moving inventory from bulk storage locations to forward pick locations when the pick location runs low. In a well-organized warehouse, pickers work from a dedicated pick face (shelving with one SKU per slot, sized for a few days of volume) rather than travelling to deep bulk storage for every pick. Replenishment keeps the pick face stocked so pickers never have to stop and hunt for product.
+
+CoreX automates replenishment: it monitors forward pick inventory levels, generates replenishment tasks when triggers are hit, and routes forklift operators or stock handlers to move product from bulk to pick with scan confirmation at every step.
+
+## How replenishment works
+
+<Steps>
+  <Step title="Trigger detected">
+    CoreX checks forward pick locations continuously (or on a schedule) for replenishment triggers. A trigger fires when a location's on-hand quantity falls at or below the **minimum quantity (reorder point)** for that item/location pair.
+
+    Triggers can also fire when:
+    - A wave is released and a pick short is detected (emergency replenishment)
+    - A supervisor manually requests replenishment
+    - A scheduled replenishment run is executed
+  </Step>
+  <Step title="Source location identified">
+    CoreX identifies the best bulk source location to pull from:
+    - Preferably the bulk location with the oldest lot (FIFO) or earliest expiry (FEFO), per the item's allocation settings
+    - Preferably the closest bulk location to the forward pick location (to minimize replenishment travel)
+    - Must have sufficient quantity to fill the pick location to its **maximum quantity**
+  </Step>
+  <Step title="Replenishment task created">
+    A replenishment task appears in the **Task Queue** for an operator with the **Replenishment** task type. The task shows:
+    - Item and quantity to move
+    - Source location (bulk)
+    - Destination location (forward pick)
+  </Step>
+  <Step title="Operator executes the task">
+    The operator travels to the source location, scans it, scans the item, confirms the quantity (at pallet or carton level), then travels to the destination location and scans it to confirm putaway. CoreX updates inventory levels immediately.
+  </Step>
+  <Step title="Pick location is refilled">
+    The forward pick location is now back above its minimum level and ready for picking. The replenishment task is marked complete.
+  </Step>
+</Steps>
+
+## Configuring replenishment rules
+
+Navigate to **Admin → Replenishment** to set up replenishment parameters.
+
+### Location-level min/max
+
+For each forward pick location and the item stored there, set:
+
+- **Minimum quantity (reorder point)** — when on-hand drops to this level, trigger replenishment. Set this above zero to allow time for replenishment before a pick short occurs.
+- **Maximum quantity (fill-to level)** — how much to fill the location to when replenishing. Usually the physical capacity of the slot.
+- **Replenishment unit of measure** — move in full cases, full pallets, or individual units
+
+Example: A forward pick bin holds 24 units of a fast-moving SKU. Set min = 6 (trigger replenishment when only a quarter slot remains), max = 24 (refill to a full slot).
+
+### Item-level replenishment settings
+
+In the item record (**Inventory → Items → [item] → Replenishment** tab):
+
+- **Enable automatic replenishment** — whether CoreX auto-generates tasks for this item
+- **Replenishment priority** — how urgently replenishment tasks for this item should be prioritized (1 = highest)
+- **Min/max defaults** — default min/max quantities applied when this item is slotted to a new forward pick location
+
+## Replenishment triggers
+
+<AccordionGroup>
+  <Accordion title="Quantity Trigger (Continuous)">
+    The default mode. CoreX checks inventory levels continuously. As soon as a location drops at or below its minimum quantity (due to a pick completing), a replenishment task is generated immediately.
+
+    **Best for:** High-velocity items where a pick short would disrupt operations immediately.
+  </Accordion>
+  <Accordion title="Wave-Based Trigger">
+    CoreX evaluates replenishment needs when a wave is being built. Before releasing the wave, it identifies any forward pick locations that will be depleted by the wave's picks and pre-generates replenishment tasks. Replenishment tasks are prioritized above the wave's pick tasks so locations are filled before pickers arrive.
+
+    **Best for:** Predictable volume warehouses with batched wave releases.
+  </Accordion>
+  <Accordion title="Scheduled Replenishment">
+    Run replenishment checks on a schedule (e.g., every morning at 06:00 before the first wave). CoreX evaluates all forward pick locations and generates tasks for any that need topping off, regardless of whether they've hit their minimum.
+
+    **Best for:** Warehouses that replenish during off-peak hours (overnight crew) to keep the pick face full at the start of each shift.
+  </Accordion>
+  <Accordion title="Manual Replenishment">
+    A supervisor manually creates a replenishment task for a specific location and item. Used for ad-hoc situations — a receiver notices a forward pick location is empty, or a picker radios in that they can't find product.
+
+    Create from: **Inventory → Replenishment → New Task**.
+  </Accordion>
+</AccordionGroup>
+
+## Monitoring replenishment
+
+The **Replenishment Dashboard** (Inventory → Replenishment) gives supervisors visibility into:
+
+- **Open tasks** — replenishment tasks waiting to be worked
+- **In progress** — tasks currently being executed
+- **Locations at minimum** — forward pick locations at or below their minimum (but no task yet generated)
+- **Empty pick locations** — forward pick locations with zero inventory (critical — pickers will short here)
+- **Overdue tasks** — replenishment tasks that have been open longer than a configurable threshold
+
+Sort by priority to tackle the most critical replenishments first. Items in active waves should be treated as highest priority.
+
+## Pick shorts and emergency replenishment
+
+When a picker arrives at a forward pick location and finds it empty or with fewer units than the system shows, they tap **Short Pick** on their terminal. CoreX:
+
+1. Records the pick short on the task and wave
+2. Immediately generates an **emergency replenishment task** (highest priority)
+3. If possible, re-routes the picker to an alternative location for the same item (bulk storage or a second forward pick slot)
+4. If no alternative exists, puts the order's pick task in **Exception** status
+
+Pick shorts are tracked over time in **Reports → Operations Control → Pick Accuracy**. Frequent pick shorts at a specific location suggest the min/max configuration needs adjustment or the item is growing faster than expected.
+
+## Replenishment and billing
+
+If your rate cards include a replenishment or handling fee, CoreX captures billable replenishment events automatically. Configure in **Billing → Rate Cards → Special Services**.
+
+## Integration with slotting
+
+Replenishment and slotting work together. After a **Slotting Optimization** run (Ship → Slotting), some items may be moved to different forward pick locations. CoreX will:
+
+1. Update the location's item assignment
+2. Update the min/max configuration for the new location
+3. Generate an initial replenishment task to stock the new location if it starts empty
+
+This ensures that after a slotting change, the new pick face is stocked before picks are directed to it.

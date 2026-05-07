@@ -1,0 +1,184 @@
+---
+title: "Rules"
+description: "Configure the decision logic that drives automated warehouse operations — putaway rules, allocation rules, and carrier rules."
+icon: "list-check"
+---
+
+CoreX's rules engine drives automated decision-making throughout the warehouse. Instead of staff making judgment calls about where to put product, how to allocate inventory to orders, or which carrier to use — CoreX evaluates your configured rules in real time and makes consistent, optimized decisions automatically.
+
+Rules are configured by Admins and evaluated in priority order. When multiple rules could apply to a situation, the highest-priority (lowest number) matching rule wins.
+
+## Putaway Rules
+
+**Putaway rules** determine where product should be stored after it's received. When a receiver finishes scanning an item during Scan to Receive, CoreX evaluates all putaway rules for that item and directs the receiver to the best available location.
+
+Navigate to **Admin → Putaway Rules** to manage rules.
+
+### Creating a putaway rule
+
+Click **New Putaway Rule** and configure:
+
+<AccordionGroup>
+  <Accordion title="Conditions (when does this rule apply?)">
+    One or more conditions that must be true for this rule to fire:
+    - **Account** — apply to a specific shipper account
+    - **Item category / class** — apply to items of a specific category
+    - **Item** — apply to a specific SKU
+    - **Inbound type** — apply to a specific type of inbound shipment (standard receive, transfer, return)
+    - **Hazmat** — apply only to hazmat-flagged items
+    - **Lot expiry within N days** — apply to items with a short remaining shelf life
+    - **Item velocity (ABC class)** — apply to A, B, or C class items
+
+    Leave conditions blank to create a catch-all rule (matches everything).
+  </Accordion>
+  <Accordion title="Location assignment strategy">
+    How to determine the putaway location:
+    - **Fixed zone** — always put in a specific zone (e.g., all frozen goods → Freezer zone)
+    - **Fixed location** — always put in a specific location (for dedicated slot items)
+    - **Nearest available** — find the closest location with capacity in the allowed zone(s)
+    - **Zone + velocity** — put A items in the Pick zone, B and C items in Bulk
+    - **Same location as existing stock** — if this SKU already exists in a location, consolidate there
+    - **Empty location only** — only put in completely empty locations (prevents commingling)
+    - **Random available** — pick any available location with capacity (for flexibility in high-volume receiving)
+  </Accordion>
+  <Accordion title="Zone restrictions">
+    If the strategy requires a zone, specify which zone(s) are allowed for this rule. List multiple zones in priority order — CoreX will try the first zone, and if no capacity is available, fall through to the next.
+  </Accordion>
+  <Accordion title="Capacity check">
+    Whether to check location capacity before suggesting a location:
+    - **Hard limit** — never suggest a location over capacity
+    - **Soft limit** — suggest even if over capacity, but show a warning
+    - **Ignore** — don't check capacity (use for bulk floor locations where overflow is acceptable)
+  </Accordion>
+  <Accordion title="Priority">
+    The priority number for this rule (1 = highest priority). When multiple rules match, the one with the lowest priority number wins. Set your most specific rules at low numbers (high priority) and catch-all rules at high numbers (low priority).
+  </Accordion>
+</AccordionGroup>
+
+### Example putaway rule setup
+
+| Priority | Conditions | Strategy | Zone |
+|----------|-----------|----------|------|
+| 1 | Category = Hazmat | Fixed zone | Hazmat Storage |
+| 2 | Category = Frozen | Fixed zone | Freezer |
+| 3 | Item velocity = A | Zone + velocity (pick first) | Forward Pick, then Bulk |
+| 4 | Account = ACME | Nearest available | ACME Dedicated Section |
+| 5 | (catch-all) | Nearest available | Bulk Storage |
+
+### Override during receiving
+
+When CoreX suggests a putaway location, the receiver or supervisor can override it if the suggested location is occupied, damaged, or otherwise inappropriate. Overrides are logged and surfaced in a daily **Putaway Override** report for supervisor review.
+
+## Allocation Rules
+
+**Allocation rules** determine how inventory is reserved (allocated) when a shipping order is created. CoreX evaluates allocation rules to decide which lots, which locations, and in what priority to draw inventory from.
+
+Navigate to **Admin → Allocation Rules** to manage rules.
+
+### Creating an allocation rule
+
+<AccordionGroup>
+  <Accordion title="Conditions">
+    When does this rule apply? Match on:
+    - **Account** — apply to a specific shipper
+    - **Item** or **Item category**
+    - **Order type** — standard order, transfer, etc.
+    - **Channel** — orders from a specific integration (Shopify vs. Amazon vs. manual)
+    - **Service level** — apply different logic for Next Day Air vs. Ground
+  </Accordion>
+  <Accordion title="Lot selection method">
+    How to choose which lot to allocate from:
+    - **FIFO** — oldest lot first (by receipt date)
+    - **FEFO** — earliest expiring lot first
+    - **Specific lot** — allocate from the lot specified on the order line (order must have a lot specified)
+    - **LIFO** — newest lot first (rare, but some accounts prefer this)
+    - **Largest lot** — allocate from the lot with the most available quantity first (reduces lot fragmentation)
+  </Accordion>
+  <Accordion title="Location selection method">
+    Which locations to allocate from, and in what order:
+    - **Pick locations first** — prefer forward pick locations before bulk (reduces picker travel)
+    - **Bulk first** — prefer bulk locations (less common, used when pick face is dedicated to a different wave)
+    - **Closest to pack station** — allocate from the location nearest to the assigned pack zone
+    - **Zone-restricted** — only allocate from specific zones (e.g., never allocate from quarantine zone)
+  </Accordion>
+  <Accordion title="Partial allocation behavior">
+    What to do if there's not enough inventory to fully allocate an order:
+    - **Partial allocate** — allocate what's available, leave the rest backordered
+    - **All or nothing** — don't allocate at all unless the full quantity is available
+    - **Split by line** — partially allocate lines individually (some lines may be fully allocated, others not)
+  </Accordion>
+  <Accordion title="Hold behavior">
+    - **Skip held inventory** — never allocate from inventory on hold
+    - **Alert on hold conflict** — allocate normally, but flag if the requested lot is on hold
+  </Accordion>
+</AccordionGroup>
+
+### Allocation rules and holds
+
+If all available inventory for a SKU is held or on another hold, the order cannot be allocated and will enter **Backordered** status. A supervisor can manually override by releasing the hold or choosing a specific lot to allocate from.
+
+## Carrier Rules
+
+**Carrier rules** control which carriers and service levels are offered for each shipper account's orders, and under what conditions CoreX selects or restricts specific carriers.
+
+Navigate to **Admin → Carrier Rules** to manage rules.
+
+### How carrier rules interact with rate shopping
+
+When CoreX rates a shipment at pack time:
+1. It first applies carrier rules to determine the **eligible carrier set** for this shipment.
+2. It then requests rates from all eligible carriers.
+3. It applies the **selection criterion** (cheapest, fastest within budget, preferred first) to the filtered rate results.
+
+Carrier rules are the gate; rate shopping is the selection within that gate.
+
+### Creating a carrier rule
+
+<AccordionGroup>
+  <Accordion title="Conditions">
+    When does this rule apply?
+    - **Account** — apply to a specific shipper account
+    - **Ship-to state / country** — apply for specific destination regions
+    - **Order weight range** — apply for shipments within a weight range (e.g., 0–1 lb, 1–50 lbs, 50+ lbs)
+    - **Order value** — for high-value shipments, require signature confirmation or specific carrier
+    - **Item category** — hazmat items require hazmat-certified carrier
+    - **Service level requested** — apply for orders requesting Ground vs. Express
+    - **Channel** — Amazon orders may have specific carrier requirements
+  </Accordion>
+  <Accordion title="Rule action">
+    What the rule does:
+    - **Restrict to carrier(s)** — only use listed carriers for matching shipments
+    - **Exclude carrier(s)** — never use listed carriers for matching shipments
+    - **Require service level** — force a specific service level (e.g., Signature Required)
+    - **Preferred carrier** — use this carrier if its rate is within X% of the cheapest
+    - **Max transit days** — exclude any carrier/service that doesn't deliver within N days
+  </Accordion>
+  <Accordion title="Carrier account selection">
+    If your warehouse has multiple accounts with the same carrier (e.g., a FedEx account per shipper), specify which carrier account to use when this rule applies.
+  </Accordion>
+</AccordionGroup>
+
+### Example carrier rule setup
+
+| Priority | Conditions | Action |
+|----------|-----------|--------|
+| 1 | Item category = Hazmat | Restrict to: FedEx, UPS (hazmat certified only) |
+| 2 | Weight > 150 lbs | Restrict to: LTL carriers |
+| 3 | Account = ACME, Channel = Amazon | Restrict to: UPS (Amazon routing guide) |
+| 4 | Ship-to state = AK, HI | Exclude: OnTrac, LSO (no coverage) |
+| 5 | Account = BETA | Preferred: FedEx (within 10% of cheapest) |
+| 6 | (catch-all) | No restriction — all carriers eligible |
+
+<Tip>
+  Keep carrier rules as simple as possible. Complex rule stacks are harder to debug when a label fails or an unexpected carrier is selected. Add rules incrementally and test after each addition.
+</Tip>
+
+## Rule evaluation testing
+
+Before going live with new rules, test them from the rule configuration page:
+
+- **Putaway Rules** → click **Test Rule** → enter an item and account → see which rule fires and what location is suggested.
+- **Allocation Rules** → click **Test Rule** → enter an item, account, and quantity → see which rule fires and which lot/location would be allocated.
+- **Carrier Rules** → click **Test Rate** → enter shipment details → see which carrier rule applies and what rates are returned.
+
+Testing helps you catch misconfigurations before they affect live operations.

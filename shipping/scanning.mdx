@@ -1,0 +1,175 @@
+---
+title: "Scan to Pick & Scan to Pack"
+description: "The mobile scan workflows for picking and packing outbound orders. Guided, scan-confirmed steps ensure accuracy from the shelf to the box."
+icon: "barcode"
+---
+
+CoreX's scan-driven pick and pack workflows keep your accuracy rates high and your error rates low. Every pick is scan-confirmed against the system — pickers can't accidentally grab the wrong SKU or wrong quantity. Every pack step verifies the right items go into the right box. Together, these workflows eliminate most common fulfillment errors without slowing your team down.
+
+## Scan to Pick
+
+**Scan to Pick** is the mobile picking workflow used on handheld RF terminals and mobile tablets. Pickers are guided through their assigned tasks with step-by-step instructions and confirm each pick with a scan.
+
+### Starting a pick session
+
+1. Log in to the mobile terminal.
+2. Navigate to **Ship → Task Queue** (or the task queue loads automatically after login, depending on your terminal configuration).
+3. CoreX displays your assigned pick tasks, ordered by optimized pick path.
+4. Tap **Start Picking** to begin.
+
+If you're not assigned to a specific wave, you can tap **Pick Next Available** and CoreX assigns you the highest-priority available pick task from the queue.
+
+### The picking flow
+
+<Steps>
+  <Step title="Travel to location">
+    CoreX displays the location to pick from:
+    - **Zone and aisle** — for navigation
+    - **Location code** — the exact bin or shelf (e.g., A-04-B)
+    - **Item description and image** — what you're looking for
+    - **Quantity to pick**
+
+    Travel to the location. For zone-picking layouts, CoreX shows a map of the zone if configured.
+  </Step>
+  <Step title="Scan the location barcode">
+    Scan the barcode on the shelf or bin label to confirm you're at the right location. CoreX validates the scan and turns the location indicator green.
+
+    If the location barcode is missing or damaged, you can manually confirm the location by typing the location code.
+  </Step>
+  <Step title="Scan the item">
+    Scan the barcode on the item (carton, inner pack, or unit). CoreX validates:
+    - Does the barcode match the expected item?
+    - Is the item from the correct lot (if lot-specific allocation)?
+    - Is the quantity available?
+
+    If the scan doesn't match, CoreX alerts you and does not advance. You cannot pick the wrong item.
+  </Step>
+  <Step title="Confirm quantity">
+    For pick-one workflows: each scan counts as one unit. For bulk picks: enter the quantity picked.
+
+    If you're picking less than the requested quantity (e.g., location is short), tap **Short Pick** and enter the actual quantity available. CoreX records the shortage and may trigger a replenishment task.
+  </Step>
+  <Step title="Scan the destination tote">
+    For batch picking, scan the tote you're placing the item in. CoreX confirms which tote corresponds to which order, so product is pre-sorted before it reaches the pack station.
+
+    For single-order picking, this step is skipped — all picks go to the same order tote.
+  </Step>
+  <Step title="Advance to next task">
+    CoreX advances automatically to the next pick task. Continue until all tasks are complete.
+  </Step>
+</Steps>
+
+### Short picks and location discrepancies
+
+If a picker arrives at a location and the product isn't there (empty shelf, wrong product at location), they tap **Location Discrepancy**. CoreX:
+
+- Records the discrepancy for inventory investigation
+- Attempts to re-allocate the pick to an alternative location (if available)
+- If no alternative exists, puts the pick task into **Exception** status for supervisor resolution
+- Optionally triggers a **Replenishment** task to refill the location
+
+### Multi-tote cart picking
+
+For batch picking with a multi-tote cart:
+
+1. Before starting, scan each tote position on your cart to register it in your session.
+2. As you pick, CoreX tells you which tote to place each item in: "Pick 2 → Tote A, Pick 1 → Tote C."
+3. After picking, bring the cart to the sort station or directly to pack stations.
+
+CoreX tracks which orders are in which tote throughout the session.
+
+## Scan to Pack
+
+**Scan to Pack** is the guided packing workflow at pack stations. Packers verify items, select the right carton, add packing material, and trigger label generation — all through scan-confirmed steps.
+
+### Setting up a pack station
+
+Pack stations are configured in **Admin → Warehouse Terminals**. Each pack station has:
+- A terminal (tablet, desktop, or fixed scanner)
+- An assigned printer for label output
+- A carton library — which box sizes are available at this station
+- An assigned zone or wave filter (optional)
+
+### The packing flow
+
+<Steps>
+  <Step title="Scan the order or tote">
+    Scan the order barcode (from the pick list / packing slip) or the tote barcode. CoreX loads the order and shows all items that need to be packed.
+  </Step>
+  <Step title="Select or scan the carton">
+    If **Cartonization** is configured, CoreX recommends the optimal carton size based on the items' dimensions and weights. The packer confirms the suggestion or selects a different box from the available carton library.
+
+    Scan the carton barcode to register it. CoreX creates a **carton record** linked to the order.
+  </Step>
+  <Step title="Scan each item into the box">
+    Scan each item as it goes into the box. CoreX:
+    - Confirms the item belongs to this order
+    - Checks off the item from the packing list
+    - Accumulates the carton weight
+
+    If you scan an item that doesn't belong to this order or that's already been packed, CoreX alerts you immediately.
+  </Step>
+  <Step title="Add packing material and seal">
+    After all items are scanned, CoreX shows a summary:
+    - Total units packed
+    - Carton dimensions and estimated weight
+    - Any special handling requirements (fragile, do not stack, etc.)
+
+    Seal the box. Tap **Carton Complete**.
+  </Step>
+  <Step title="Weigh the carton (if configured)">
+    If a scale is connected to the pack station, CoreX prompts you to place the sealed carton on the scale. The actual weight is captured and compared to the estimated weight. Large discrepancies trigger a review prompt.
+  </Step>
+  <Step title="Rate and print label">
+    CoreX rates the carton against connected carrier accounts using the order's service requirements, actual weight, and dimensions. It selects the optimal rate (per your carrier rules) and generates the carrier label.
+
+    The label prints automatically to the pack station's assigned printer. Attach the label to the carton.
+  </Step>
+  <Step title="Scan label to confirm">
+    After affixing the label, scan the tracking number barcode to confirm. CoreX records the tracking number on the order and marks the carton as labeled.
+
+    If the order has multiple cartons, repeat steps 2–7 for each carton.
+  </Step>
+  <Step title="Order complete">
+    When all cartons are labeled, the order moves to **Labeled** status. Carry the carton(s) to the staging area for that carrier. Scan the staging location barcode if prompted (for dock-level tracking).
+  </Step>
+</Steps>
+
+### Pack verification modes
+
+<Tabs>
+  <Tab title="Full verification">
+    Every item must be scanned before the carton can be closed. Default mode. Maximum accuracy.
+  </Tab>
+  <Tab title="Count verification">
+    The packer confirms a count per SKU without scanning each unit individually. Faster for high-unit-count orders (e.g., 100 of the same item), with slightly lower verification certainty.
+  </Tab>
+  <Tab title="Weight-based verification">
+    CoreX compares the expected weight of the packed items to the measured carton weight. If the weight matches (within tolerance), the pack is approved. Used for very high-speed operations with consistent product weights.
+  </Tab>
+</Tabs>
+
+### Reprinting labels
+
+To reprint a label:
+1. Go to **Ship → Shipping Orders** and open the order.
+2. Click the **Labels** tab.
+3. Find the label and click **Reprint**. Select the target printer.
+
+Or on the pack station terminal, tap **Reprint Last Label**.
+
+<Warning>
+  Reprinted labels have the same tracking number as the original. Do not ship both the original and reprinted label — void the original first by clicking **Void Label** on the label record.
+</Warning>
+
+### Cartonization
+
+**Cartonization** automatically determines the optimal box size for each order. Configure your carton library (box dimensions and weights) in **Admin → Cartonization Config**, then enable cartonization per account or globally.
+
+Cartonization considers:
+- Item dimensions and weights from the item master
+- Available carton sizes at the pack station
+- Account-specific packaging preferences (e.g., always use custom branded boxes)
+- Target fill rate (minimize dead space)
+
+The cartonization recommendation appears at the start of each pack session and can always be overridden by the packer.

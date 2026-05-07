@@ -1,0 +1,121 @@
+---
+title: "Scan to Receive"
+description: "The mobile scan workflow for capturing inbound product at the dock. Scan barcodes, confirm quantities, flag damage, and complete putaway — all from a handheld terminal."
+icon: "barcode"
+---
+
+**Scan to Receive** is the guided scanning workflow your receiving team uses on the dock to capture inbound product. It runs on any warehouse terminal — handheld RF guns, mobile tablets, or any device running the CoreX mobile interface. Every scan is validated in real time against the receiving order, so discrepancies are caught immediately rather than discovered during a cycle count weeks later.
+
+## Getting started
+
+To begin receiving:
+
+1. On the mobile terminal, navigate to **Receive → Scan to Receive**.
+2. Scan the **Receiving Order barcode** from the printed RO sheet, or manually enter the RO number.
+3. CoreX loads the expected line items and displays the first item to receive.
+
+Alternatively, a supervisor can open the RO on a desktop and click **Start Receiving**, then hand the terminal to a receiver. The session stays synchronized.
+
+## The scanning flow
+
+<Steps>
+  <Step title="Scan the item barcode">
+    The receiver scans the barcode on the carton, inner pack, or individual unit. CoreX matches the barcode against:
+
+    - Known barcodes for items on the RO
+    - GS1-128 barcodes (which may encode quantity, lot, and expiry)
+    - UPC/EAN, SSCC, or custom barcode formats configured for the account
+
+    If the barcode matches a line on the RO, CoreX confirms the match and prompts for quantity. If it doesn't match, see the **Unexpected SKUs** section below.
+  </Step>
+  <Step title="Confirm or enter quantity">
+    By default, each scan increments the received quantity by 1. If you're scanning at the **carton** or **pallet** level, CoreX knows the pack quantity from the item master and converts automatically.
+
+    For bulk receiving, you can override the quantity by tapping the quantity field and entering a number before scanning. This is useful when receiving pallets of a single SKU quickly.
+  </Step>
+  <Step title="Capture lot and expiry (if required)">
+    If the SKU is configured for **lot tracking** or **expiry date tracking**, CoreX prompts you to scan or enter:
+    - Lot number (scanned from GS1-128 or entered manually)
+    - Expiration date
+
+    These are stored on the inventory record and used for FEFO (First Expired, First Out) or FIFO allocation later.
+  </Step>
+  <Step title="Flag damage (if any)">
+    Tap **Flag Damage** on any scan to mark units as damaged. You'll be prompted to select a damage reason code (configured in **Admin → System Parameters**) and optionally take a photo. Damaged units are tracked separately and excluded from available inventory until a disposition decision is made.
+  </Step>
+  <Step title="Confirm putaway location">
+    After scanning a line to completion, CoreX suggests a **putaway location** based on your putaway rules. The receiver sees the location code on screen, travels to that location, and scans the location barcode to confirm putaway.
+
+    If the suggested location is full or inaccessible, the receiver can tap **Override Location** and scan an alternative location. The override is logged for supervisor review.
+  </Step>
+  <Step title="Move to the next item">
+    After putaway is confirmed, CoreX marks that line as complete and advances to the next item. The receiver repeats the flow until all lines are done.
+  </Step>
+</Steps>
+
+## Receiving modes
+
+CoreX supports three receiving modes, configurable per account or per RO:
+
+<Tabs>
+  <Tab title="Guided Mode">
+    The default mode. CoreX presents items one at a time in a suggested order (optimized for your dock layout). The receiver follows the on-screen prompts. Best for trained receivers following a structured workflow.
+  </Tab>
+  <Tab title="Free-Scan Mode">
+    The receiver scans items in any order. CoreX matches each scan to an RO line and accumulates counts. Discrepancies are shown at the end. Best for fast, experienced receivers or for bulk pallets.
+  </Tab>
+  <Tab title="Blind Receive">
+    The receiver is not shown expected quantities — they scan and count independently, with no reference to what was expected. CoreX records what was actually received and calculates discrepancies automatically. Used when you don't want receivers biased by the expected quantity (useful for high-value or compliance-sensitive shipments).
+  </Tab>
+</Tabs>
+
+## Handling unexpected SKUs
+
+If a receiver scans a barcode that doesn't match any line on the current RO:
+
+- CoreX displays a **"SKU Not on Order"** alert.
+- The receiver can:
+  - **Accept as unexpected** — logs the scan as an unexpected item on the RO. A supervisor must review and disposition it.
+  - **Assign to account** — if the barcode matches a known item in the system, a supervisor can assign it to the correct account and RO.
+  - **Reject** — refuse the unit. Flagged for return to supplier.
+
+Unexpected SKUs appear in the RO's **Discrepancies** tab and in the **Receiving Exceptions** report.
+
+## Pallet-level receiving
+
+For large inbound shipments on pallets, CoreX supports **pallet-level receiving**:
+
+1. Assign a CoreX pallet label (or scan the supplier's SSCC label) to the pallet.
+2. Scan the pallet in Scan to Receive. CoreX links all items on that pallet to the pallet ID.
+3. During putaway, scan the pallet to a location. All inventory on the pallet is attributed to that location.
+
+Pallet tracking lets you move inventory at the pallet level during putaway, replenishment, and outbound staging.
+
+## Receiving without a pre-existing RO
+
+If a truck arrives unexpectedly (no RO exists), you can create an RO on the fly:
+
+1. From Scan to Receive, tap **New Ad-Hoc RO**.
+2. Select the account and begin scanning.
+3. CoreX creates the RO and records scans against it. A supervisor can complete the RO header details later.
+
+<Warning>
+  Ad-hoc receiving bypasses standard PO matching and may affect billing accuracy. Supervisors should review and complete ad-hoc ROs promptly.
+</Warning>
+
+## Session management
+
+A receiving session is tied to a logged-in user and terminal. If a receiver needs to hand off mid-shipment:
+
+- The session is automatically saved when they log out.
+- Another receiver can pick up the session by opening the same RO from their terminal.
+- Scan history is preserved with the original receiver's user ID for auditing.
+
+## After receiving is complete
+
+Once all lines on an RO are received (or the supervisor closes the RO):
+
+- Inventory is live and searchable in **Inventory → Stock on Hand**.
+- Billable receiving events are captured automatically against the account's rate card.
+- Any discrepancies are visible on the RO and in the **Receiving Exceptions** report.
+- If QC is required, the RO enters **QC Hold** status until inspection is complete.

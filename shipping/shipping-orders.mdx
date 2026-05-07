@@ -1,0 +1,142 @@
+---
+title: "Shipping Orders"
+description: "Create, manage, and track outbound orders from allocation through carrier pickup. Every order type from small parcel to LTL freight."
+icon: "clipboard-list"
+---
+
+A **Shipping Order (SO)** is the central document for outbound fulfillment in CoreX. Each shipping order represents a request to ship product to a destination, with specified items, quantities, and service requirements. Orders flow from **Pending** all the way to **Shipped** with full traceability at every step.
+
+## Viewing shipping orders
+
+Navigate to **Ship → Shipping Orders** to see all outbound orders. The list view is highly filterable:
+
+- **Account** — filter to a specific shipper
+- **Status** — filter by any combination of order statuses
+- **Ship date** — filter by requested or actual ship date
+- **Carrier / service** — filter by carrier or service level
+- **Wave** — filter to orders in a specific wave
+- **Channel** — filter by source channel (Shopify, Amazon, manual, API, etc.)
+- **Search** — search by order number, tracking number, or ship-to name
+
+Use the **Columns** button to customize which fields are shown in the list. Save your column configuration as a saved view for quick access.
+
+## Creating a shipping order manually
+
+Click **New Shipping Order** and fill in:
+
+<AccordionGroup>
+  <Accordion title="Account">
+    Select the shipper account the order belongs to. Inventory will be allocated from that account's stock only.
+  </Accordion>
+  <Accordion title="Order Type">
+    Select the outbound type: standard order, transfer, freight shipment, work order fulfillment, etc. Configured in **Admin → Inbound/Outbound Types**.
+  </Accordion>
+  <Accordion title="Ship-To Address">
+    Enter the end customer's delivery address. CoreX validates addresses against the carrier's address validation API and flags undeliverable addresses before a label attempt. You can save addresses to the account's address book for reuse.
+  </Accordion>
+  <Accordion title="Service Level">
+    Select the requested service level (Ground, 2-Day, Overnight, LTL, etc.). CoreX uses this to match carrier rules and calculate estimated delivery dates.
+  </Accordion>
+  <Accordion title="Requested Ship Date">
+    The date by which the order should ship. CoreX uses this for wave cutoff logic and SLA tracking.
+  </Accordion>
+  <Accordion title="Line Items">
+    Add the SKUs and quantities to ship. You can search by SKU, item name, or barcode. CoreX shows current available inventory for each item under the selected account.
+
+    For each line, optionally specify:
+    - **Lot number** — if you need to ship from a specific lot
+    - **Preferred location** — pick from a specific location
+    - **Unit of measure** — ship in eaches, inner packs, or cases
+  </Accordion>
+  <Accordion title="Shipping Instructions">
+    Add any special instructions for the pick/pack team or carrier. These appear in the Task Queue during pick and on the packing slip.
+  </Accordion>
+  <Accordion title="Reference Numbers">
+    Enter the customer's order number, PO number, or any external reference. These appear on packing slips, labels (if configured), and in the Seller Portal.
+  </Accordion>
+</AccordionGroup>
+
+Click **Save**. If inventory is available, CoreX allocates it immediately and the order moves to **Ready**.
+
+## Bulk import
+
+Import multiple shipping orders at once from **Ship → Shipping Orders → Import**. Download the CSV template, fill in your orders, and upload. CoreX validates each row and shows any errors before importing.
+
+You can also import orders via the **REST API** or receive them automatically through channel integrations (Shopify, Amazon, EDI).
+
+## Order detail page
+
+Click any order to open the detail page. Here you'll find:
+
+- **Header** — account, ship-to, service level, status, timestamps
+- **Line Items** — what was ordered, what's allocated, what's been picked/packed
+- **Pick Tasks** — which pickers were assigned and their progress
+- **Cartons** — boxes created during packing, with dimensions, weight, and tracking number
+- **Labels** — all labels generated for this order (download or reprint from here)
+- **Tracking** — live carrier tracking status
+- **Exceptions** — any issues flagged during fulfillment
+- **Timeline** — full audit log of every status change, user action, and scan
+
+## Allocation
+
+When an order is saved, CoreX runs allocation automatically using the account's **Allocation Rules** (configured in **Admin → Allocation Rules**).
+
+Allocation rules determine:
+- **Which lots to allocate from** — FIFO (first in, first out), FEFO (first expired, first out), or lot-specific
+- **Which locations to allocate from** — pick locations, bulk, or any
+- **Partial allocation** — whether to partially allocate if full quantity isn't available, or hold the order until all units are available
+
+**Allocation statuses by line:**
+
+| Status | Meaning |
+|--------|---------|
+| Allocated | Full quantity reserved |
+| Partially Allocated | Some quantity reserved; rest is backordered |
+| Backordered | No inventory available; order is waiting |
+| Manually Allocated | A supervisor has overridden the allocation |
+
+To manually adjust allocation, open the order → **Line Items** tab → click **Reallocate** on any line.
+
+## Holds
+
+Place a hold on an order to prevent it from being waved:
+
+1. Open the order → click **Place Hold**.
+2. Select a hold reason (Address issue, Payment pending, Customer request, etc.).
+3. The order remains in its current status but is excluded from wave eligibility.
+
+To release: click **Release Hold**. The order re-enters the wave pool.
+
+<Warning>
+  Holds do not release allocated inventory. If you need to release the inventory for other orders while an order is on hold, unallocate the order first from the Line Items tab.
+</Warning>
+
+## Exceptions
+
+An order enters **Exception** status when something requires supervisor review that can't be resolved automatically. Common exceptions:
+
+- Address validation failure
+- Label print failure
+- Carrier rate error
+- Item not found at pick location (location discrepancy)
+- Weight/dimensions outside carrier limits
+
+Exceptions are visible in the **Ship Out Dashboard** and in the **Exceptions** queue (**Admin → Exceptions**). Each exception has a resolution workflow — fix the issue and click **Resolve**.
+
+## Cancellation
+
+To cancel an order, open it and click **Cancel Order**. Confirm the cancellation. Allocated inventory is released back to available stock.
+
+Orders can only be cancelled if they haven't been picked yet. Once picking has started, contact your supervisor to handle the cancellation — partially picked orders require manual inventory adjustment.
+
+## Freight / LTL orders
+
+For large shipments that ship via LTL or FTL freight, use **Ship → Freight / LTL**. Freight orders have additional fields:
+
+- **Commodity class** (for LTL NMFC classification)
+- **Pieces and pallets count**
+- **Total weight and dimensions**
+- **Pickup vs. delivery appointment** requirements
+- **BOL generation** — CoreX generates the Bill of Lading automatically
+
+Freight shipments go through the same wave → pick → pack flow, but the carrier labeling step generates a BOL and freight labels instead of small-parcel labels.

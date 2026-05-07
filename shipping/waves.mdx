@@ -1,0 +1,166 @@
+---
+title: "Wave Planning"
+description: "Group outbound orders into waves for efficient batch picking. Configure auto-wave rules, cutoff times, and pick path optimization."
+icon: "layer-group"
+---
+
+**Wave planning** is how CoreX batches outbound orders for the pick floor. Instead of sending pickers to fulfill one order at a time, a wave groups many orders together so pickers can traverse the warehouse once and collect product for dozens of orders in a single pass. Waves dramatically increase pick throughput and reduce travel time.
+
+## What is a wave?
+
+A wave is a released batch of shipping orders that are picked together. When a wave is released:
+
+1. CoreX generates a **consolidated pick list** across all orders in the wave.
+2. Pick **tasks** are created in the Task Queue and assigned to available pickers.
+3. Pickers follow an optimized path through the warehouse, picking items by location rather than by order.
+4. After picking, product is sorted to orders at a sort station (or batch-sorted by a picker using a multi-tote cart).
+5. The wave is complete when all pick tasks are confirmed and all items are sorted to their orders.
+
+## Creating a wave
+
+Navigate to **Ship → Waves** and click **New Wave**.
+
+<Steps>
+  <Step title="Set wave parameters">
+    Configure the wave:
+    - **Wave name** — auto-generated or custom label (e.g., "FedEx AM Wave 05/07")
+    - **Account filter** — limit the wave to orders from a specific account, or include all
+    - **Carrier / service filter** — limit to orders for a specific carrier or service level (e.g., only FedEx Priority Overnight)
+    - **Ship date filter** — include only orders with a requested ship date on or before a specific date
+    - **Order count limit** — cap the number of orders in this wave
+    - **Line count limit** — cap the number of pick lines in this wave
+    - **Zone restriction** — limit picks to a specific zone (useful for zone-picking workflows)
+  </Step>
+  <Step title="Review eligible orders">
+    CoreX queries all Ready orders that match the wave parameters and shows them in a candidate list. Review the list:
+    - Check order count, total units, and estimated pick time
+    - Add or remove specific orders using checkboxes
+    - See which carrier cutoffs are at risk (flagged in orange/red)
+
+    Use **Sort** to prioritize by ship date, service level urgency, or account.
+  </Step>
+  <Step title="Review the pick plan">
+    Before releasing, click **Preview Pick Plan** to see:
+    - Total pick tasks to be generated
+    - Pick locations involved
+    - Estimated distance / travel time
+    - How many pickers are recommended
+
+    The pick plan preview helps you decide whether to split into two smaller waves or proceed with the current batch.
+  </Step>
+  <Step title="Release the wave">
+    Click **Release Wave**. CoreX:
+    - Locks the orders into the wave (they can't be added to another wave)
+    - Generates pick tasks in the Task Queue
+    - Notifies available pickers on their terminals that new tasks are ready
+    - Updates the Wave status to **Released**
+  </Step>
+</Steps>
+
+## Wave statuses
+
+| Status | Description |
+|--------|-------------|
+| **Draft** | Wave is being built; orders can still be added or removed |
+| **Released** | Wave released to the floor; pick tasks generated |
+| **Picking** | At least one pick task is in progress |
+| **Picked** | All pick tasks complete; product sorted and ready for pack |
+| **Packing** | Pack tasks in progress |
+| **Complete** | All orders in the wave are packed and labeled |
+| **Cancelled** | Wave cancelled before release |
+
+## Auto-wave rules
+
+For high-volume operations, manual wave building doesn't scale. Use **Auto-Wave Rules** to have CoreX build and release waves automatically.
+
+Navigate to **Admin → Pipeline Config → Auto-Wave Rules** and click **New Rule**. Configure:
+
+<AccordionGroup>
+  <Accordion title="Trigger type">
+    - **Schedule-based** — run at a specific time (e.g., every day at 08:00 and 12:00)
+    - **Order count threshold** — trigger when N eligible orders are queued
+    - **Cutoff-based** — trigger X minutes before a carrier cutoff time
+  </Accordion>
+  <Accordion title="Order filter">
+    Which orders to include: by account, carrier, service level, ship date, order type, or any combination. You can create multiple auto-wave rules for different carrier windows.
+  </Accordion>
+  <Accordion title="Wave size limits">
+    Set maximum orders per wave and maximum pick lines per wave. When the limit is reached, CoreX starts a new wave automatically.
+  </Accordion>
+  <Accordion title="Release mode">
+    - **Auto-release** — wave is built and released without supervisor approval
+    - **Pending approval** — wave is built and put in Draft for a supervisor to review before releasing
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  Start with **Pending approval** mode while you tune your wave parameters. Switch to **Auto-release** once you're confident in the rule logic.
+</Tip>
+
+## Pick path optimization
+
+CoreX optimizes pick task ordering to minimize travel distance through the warehouse. The optimization algorithm uses your location layout (zone, aisle, bay, level) to sequence picks in a logical path.
+
+**Optimization strategies** (configurable per warehouse):
+
+- **S-curve / serpentine** — traverse aisles in alternating directions, the most common strategy
+- **Return** — always enter and exit an aisle from the same end (better for very long aisles)
+- **Midpoint** — enter aisles only when picks are within a configurable number of positions of each other
+- **Zone-first** — complete all picks in one zone before moving to the next
+
+Configure the strategy in **Admin → System Parameters → Pick Optimization**.
+
+## Batch picking and cluster picking
+
+CoreX supports multiple picking methods:
+
+<Tabs>
+  <Tab title="Single-order picking">
+    One picker, one order. Simple and accurate. Best for large, complex orders or fragile items. No sorting required.
+  </Tab>
+  <Tab title="Batch picking (multi-order)">
+    One picker, multiple orders simultaneously. The picker carries multiple totes or a multi-tote cart. Each pick is scanned to a specific tote. CoreX directs the picker: "Pick 3 of SKU ABC → Tote 1, 1 of SKU ABC → Tote 3." Best for small, similar orders (e.g., e-commerce parcels).
+  </Tab>
+  <Tab title="Zone picking">
+    Each picker is assigned to a zone. As an order's wave passes through zones, each zone picker adds their items to the order's tote. Totes are conveyed or hand-carried between zones. Best for large warehouses with distinct product areas.
+  </Tab>
+  <Tab title="Pick-and-sort">
+    Pickers pick by SKU (all units of one SKU at once) and place them on a sortation conveyor or sort wall. A sorter or automated system routes items to the correct order position. Best for very high volume with sortation equipment.
+  </Tab>
+</Tabs>
+
+## Monitoring wave progress
+
+The **Ship Out Dashboard** and the **Wave detail page** show real-time wave progress:
+
+- **Pick completion %** — what fraction of pick tasks are done
+- **Tasks by status** — pending, in progress, completed, exception
+- **Picker assignments** — which users are working the wave and their progress
+- **Estimated completion time** — based on current pick rate
+- **Carrier cutoff countdown** — how much time remains before the cutoff for this wave's carrier(s)
+
+If a wave is running behind, a supervisor can:
+- **Add pickers** — assign additional users to the wave's task pool
+- **Reprioritize tasks** — move urgent orders' tasks to the top of the queue
+- **Split the wave** — pull urgent orders out into a new, smaller wave that can complete in time for the cutoff
+
+## Modifying a released wave
+
+After a wave is released, you can still:
+- **Add orders** — if the wave is still in **Released** or early **Picking** status
+- **Remove orders** — if their pick tasks haven't started yet. Removed orders return to Ready status.
+- **Cancel the wave** — all incomplete pick tasks are cancelled, orders return to Ready
+
+<Warning>
+  You cannot remove an order from a wave if its pick tasks are in progress or complete. In that case, you must complete the wave and handle the order in the next wave or manually.
+</Warning>
+
+## Cutoff times
+
+Carrier cutoff times define when you need to stop including new orders in a wave to ensure the wave completes and the carrier manifest closes before the pickup window. Configure cutoffs in **Admin → Cutoff Times**.
+
+For each carrier + service level combination, set:
+- **Cutoff time** — the latest time to include an order in a wave (e.g., 14:00 for FedEx Ground)
+- **Lead time** — how many minutes before cutoff to stop waving (e.g., 60 minutes, so the effective cutoff for new waves is 13:00)
+
+Orders past their cutoff show a **Cutoff Risk** flag in the Shipping Orders list and in wave candidate lists.

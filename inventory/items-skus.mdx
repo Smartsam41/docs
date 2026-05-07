@@ -1,0 +1,137 @@
+---
+title: "Items & SKUs"
+description: "Manage your item master — create and update SKU records, configure barcodes, dimensions, lot tracking, and account-level item settings."
+icon: "cube"
+---
+
+The **item master** in CoreX is the foundation of your inventory. Every product you store is defined as an **Item** (also called a SKU). The item record stores everything CoreX needs to receive, store, pick, pack, and ship that product correctly: barcodes, dimensions, weight, lot tracking requirements, cartonization data, and account-specific settings.
+
+## Viewing items
+
+Navigate to **Inventory → Items** to see all items across all accounts. Filter by:
+- **Account** — show only items for a specific shipper
+- **Status** — Active, Inactive, or Archived
+- **Category / Class** — item classification groups
+- **Search** — by SKU, barcode, description, or supplier item number
+
+Click any item to open its detail page.
+
+## Creating an item
+
+Click **New Item** from the Items list. Fill in the item record:
+
+<AccordionGroup>
+  <Accordion title="Basic Information">
+    - **Account** — which shipper account this item belongs to
+    - **SKU** — your internal item identifier. Must be unique within the account.
+    - **Description** — item name or product description, shown in pick/pack interfaces
+    - **UPC / EAN** — the retail barcode, used for scanning during receiving, picking, and packing
+    - **Supplier Item Number** — the vendor's part number, used for PO matching
+    - **Status** — Active (available for all operations) or Inactive (cannot be received, ordered, or picked)
+  </Accordion>
+  <Accordion title="Classification">
+    - **Category** — top-level grouping (e.g., Apparel, Electronics, Grocery)
+    - **Class / Subclass** — secondary grouping within a category
+    - **Hazmat flag** — mark if this item contains hazardous materials. Hazmat items require carrier-specific declarations and packaging.
+    - **Country of Origin** — used for international shipments and customs documentation
+    - **Harmonized Code (HS Code)** — for international customs classification
+  </Accordion>
+  <Accordion title="Dimensions and Weight">
+    Enter the dimensions and weight for the **each** (individual unit):
+    - **Length, Width, Height** (in inches or cm, per your system setting)
+    - **Weight** (in lbs or kg)
+
+    These are used for cartonization, carrier rate estimation, and capacity planning. Accurate dimensions are important — incorrect dimensions lead to label reprints and carrier billing adjustments.
+
+    If the item ships in inner packs or cases, configure the pack hierarchy in the **Pack Sizes** tab:
+    - Inner pack quantity and dimensions
+    - Case / master carton quantity and dimensions
+    - Pallet quantity and dimensions
+  </Accordion>
+  <Accordion title="Barcodes">
+    Add all barcodes associated with this item. CoreX accepts multiple barcodes per item (UPC, EAN, ISBN, ITF-14, SSCC, or custom). During receiving and picking, any registered barcode will match to this item.
+
+    Click **Add Barcode** and enter the barcode value and type. Mark one barcode as the **Primary** barcode — this is the one used on packing slips and item labels.
+  </Accordion>
+  <Accordion title="Lot and Serial Tracking">
+    Enable **lot tracking** if this item needs to be tracked at the lot level (required for food, pharma, regulated goods, or any item with expiration dates):
+    - **Lot tracking enabled** — toggle on
+    - **Expiration date required** — require an expiry date when receiving a new lot
+    - **Serial tracking** — enable for items that need per-unit serial number tracking
+    - **Allocation method** — FIFO (by lot creation date), FEFO (by expiration date), or specific lot (pickers are directed to a specific lot per order)
+
+    Once enabled, every receive, pick, pack, and return transaction will be associated with a specific lot number.
+  </Accordion>
+  <Accordion title="Storage Requirements">
+    - **Storage temperature** — ambient, refrigerated, or frozen (informational; used for zone assignment rules)
+    - **Stackable** — whether this item can be stacked in storage
+    - **Max stack height** — maximum number of units to stack
+    - **Hazardous storage class** — for items requiring segregation
+    - **Default putaway zone** — override the default putaway zone for this item
+  </Accordion>
+  <Accordion title="QC Settings">
+    - **Require QC on receive** — flag all inbound receipts of this item for QC inspection
+    - **Default QC checklist** — which checklist to use (overrides account default)
+    - **Require QC on return** — flag all returns of this item for QC inspection
+  </Accordion>
+</AccordionGroup>
+
+## Stock on Hand
+
+From any item's detail page, click the **Stock on Hand** tab to see a real-time breakdown of that item's inventory:
+
+| Column | Description |
+|--------|-------------|
+| Location | Warehouse location holding this inventory |
+| Lot | Lot number (if lot-tracked) |
+| Expiry | Expiration date (if applicable) |
+| On Hand | Total units at this location |
+| Allocated | Units reserved for pending orders |
+| Available | On Hand minus Allocated |
+| Status | Available, Hold, Quarantine, Damaged |
+
+You can filter by account (if the same SKU exists for multiple accounts) and export the stock position to CSV.
+
+## Bulk item import
+
+To create or update many items at once, use the **Import** tool:
+
+1. Go to **Admin → Import → Items** and download the CSV template.
+2. Fill in your item data. Required fields: Account, SKU, Description.
+3. Upload the CSV. CoreX validates each row and shows errors before importing.
+4. Items are created or updated (if the SKU already exists for that account).
+
+The import template includes all item fields including barcodes, dimensions, and lot settings.
+
+## Item images
+
+Upload a product image for each item from the item detail page's **Images** tab. Images appear:
+- On the pick terminal during Scan to Pick (helps pickers visually verify they've grabbed the right product)
+- On packing slips (optional, per account setting)
+- In the Seller Portal's item catalog
+
+Supported formats: JPG, PNG, WebP. Recommended size: 800×800px.
+
+## Managing inactive items
+
+Items that are no longer stocked or active should be set to **Inactive** rather than deleted. Inactive items:
+- Cannot be received (you'll get an error if you try to receive an inactive item)
+- Cannot be added to new shipping orders
+- Still show in historical transaction reports
+- Still show on hand if there's remaining stock (you'll need to disposition that stock separately)
+
+To deactivate: open the item → click **Deactivate**. To reactivate: click **Activate**.
+
+<Warning>
+  Do not delete items. Deletion removes the item record but transaction history references remain, causing broken links in historical reports. Use Inactive status instead.
+</Warning>
+
+## Account-specific item settings
+
+If the same physical product is stored for multiple accounts (with different barcodes or SKU codes), create separate item records for each account. Each account's item can have different:
+- Barcodes and SKU codes
+- QC requirements
+- Allocation methods
+- Putaway zone preferences
+
+This separation ensures that account operations, billing, and reporting remain clean and independent.

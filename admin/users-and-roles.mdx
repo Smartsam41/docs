@@ -1,0 +1,208 @@
+---
+title: "Users & Roles"
+description: "Manage your CoreX team. Add users, assign roles (Admin, Manager, Operator, Viewer), configure permissions, and set up SSO for your organization."
+icon: "users"
+---
+
+CoreX uses a role-based access control (RBAC) system to manage what each user can see and do. Every user is assigned a **role** that grants a predefined set of permissions. Roles can be further customized with per-user overrides for edge cases.
+
+## Roles
+
+CoreX has four built-in roles, designed to match the real job functions in a warehouse:
+
+<AccordionGroup>
+  <Accordion title="Admin">
+    Full access to all CoreX functionality. Admins can configure system settings, manage users, connect integrations, set up billing, and perform all operational functions.
+
+    **Who gets this role:** Warehouse management system administrators, IT staff, and senior warehouse managers responsible for the overall system configuration.
+
+    **Key capabilities:**
+    - All operations (receive, ship, inventory, billing)
+    - User management and role assignment
+    - System configuration (Admin panel)
+    - Integration setup
+    - Billing and invoice management
+    - Audit log access
+    - Data export and data tools
+  </Accordion>
+  <Accordion title="Manager">
+    Broad operational access without system administration. Managers can do everything needed to run the warehouse floor but cannot modify system configuration, add users, or change billing settings.
+
+    **Who gets this role:** Shift supervisors, operations managers, account managers.
+
+    **Key capabilities:**
+    - All receiving operations (create ROs, close ROs, override putaway)
+    - All shipping operations (create waves, manage exceptions, reprint labels)
+    - Inventory management (adjustments, cycle counts, holds)
+    - Customer and account management (view accounts, manage orders)
+    - Reports (all reports)
+    - Billing transactions (view, add manual transactions)
+    - Cannot: manage users, change system parameters, manage integrations, manage billing rate cards
+  </Accordion>
+  <Accordion title="Operator">
+    Day-to-day warehouse floor operations. Operators execute tasks assigned to them — scanning, picking, packing, receiving — but cannot make supervisory decisions or configuration changes.
+
+    **Who gets this role:** Receivers, pickers, packers, forklift operators, cycle counters.
+
+    **Key capabilities:**
+    - Scan to Receive
+    - Scan to Pick and Scan to Pack
+    - Task Queue (execute assigned tasks)
+    - Cycle Count (perform counts)
+    - Replenishment tasks
+    - View inventory at their assigned locations
+    - Cannot: create orders, close ROs, release waves, make inventory adjustments, view reports, access billing
+  </Accordion>
+  <Accordion title="Viewer">
+    Read-only access to specified data. Viewers can see information but cannot take any actions or make any changes.
+
+    **Who gets this role:** Shipper account contacts who need internal visibility, auditors, executives who need reporting access without operational capabilities.
+
+    **Key capabilities:**
+    - View shipping orders, receiving orders, inventory
+    - View reports and dashboards
+    - View invoices and billing transactions
+    - Cannot: create, edit, or cancel anything; perform any operations
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  Shipper clients (your customers) access their data through the separate **Seller Portal**, not through the main CoreX app. You don't need to create CoreX user accounts for your shipper clients — invite them to the Seller Portal from the account detail page instead.
+</Note>
+
+## Adding a user
+
+Navigate to **Admin → Team Members** and click **Invite User**.
+
+Fill in:
+- **Email address** — the user's work email
+- **First name** and **Last name**
+- **Role** — Admin, Manager, Operator, or Viewer
+- **Account restrictions** (optional) — limit the user to see only specific shipper accounts. Useful for account managers who only work with certain clients. Leave blank to grant access to all accounts.
+- **Location restrictions** (optional) — limit an Operator to tasks in specific zones or locations. Useful for zone-picking layouts where each picker works a dedicated zone.
+
+Click **Send Invitation**. The user receives an email with a link to set up their password and complete their profile.
+
+Invitations expire after 7 days. You can resend an invitation from the Team Members list.
+
+## Permission matrix
+
+| Capability | Admin | Manager | Operator | Viewer |
+|-----------|-------|---------|----------|--------|
+| View orders and inventory | ✓ | ✓ | ✓ (limited) | ✓ |
+| Create/edit shipping orders | ✓ | ✓ | | |
+| Create/edit receiving orders | ✓ | ✓ | | |
+| Scan to Receive | ✓ | ✓ | ✓ | |
+| Scan to Pick / Pack | ✓ | ✓ | ✓ | |
+| Release waves | ✓ | ✓ | | |
+| Inventory adjustments | ✓ | ✓ | | |
+| Cycle count (perform) | ✓ | ✓ | ✓ | |
+| Cycle count (approve/commit) | ✓ | ✓ | | |
+| View reports | ✓ | ✓ | | ✓ |
+| Manage billing | ✓ | View only | | ✓ |
+| Manage accounts | ✓ | ✓ | | |
+| System configuration | ✓ | | | |
+| User management | ✓ | | | |
+| Integration setup | ✓ | | | |
+| Data tools / export | ✓ | | | |
+
+## Custom permissions
+
+For edge cases where a built-in role doesn't exactly fit, you can override individual permissions on a per-user basis:
+
+1. Open the user's profile in **Admin → Team Members**.
+2. Click **Custom Permissions**.
+3. Toggle specific capabilities on or off, overriding the user's role defaults.
+
+Custom permission overrides are noted on the user's profile with an icon indicating the role was customized. Use this sparingly — roles are easier to manage at scale.
+
+## Managing users
+
+### Editing a user
+
+Click a user's name in **Admin → Team Members** to open their profile. Edit their name, role, account restrictions, or location restrictions. Changes take effect immediately on their next page load.
+
+### Deactivating a user
+
+When someone leaves your team, deactivate rather than delete their account:
+
+1. Open their user profile → click **Deactivate User**.
+2. Confirm the deactivation.
+
+Deactivated users cannot log in. Their historical actions (picks, scans, adjustments) remain in the audit log — linked to their user record — for traceability. Reactivate at any time from the same screen.
+
+<Warning>
+  Do not delete user accounts. Deletion removes the user record but historical transactions reference it, causing broken links in audit logs. Use deactivation instead.
+</Warning>
+
+### Transferring Admin access
+
+If your Admin is leaving:
+1. Promote another user to Admin first (before deactivating the outgoing Admin).
+2. There must always be at least one active Admin in the system.
+
+## Password and authentication
+
+### Password policy
+
+Configure password requirements in **Admin → Security → Password Policy**:
+- Minimum length (default: 12 characters)
+- Require uppercase, lowercase, numbers, symbols
+- Maximum password age (days until forced reset)
+- Prevent password reuse (last N passwords)
+
+### Single Sign-On (SSO)
+
+For teams using an identity provider (IdP), enable SSO to let users log in with their corporate credentials.
+
+Navigate to **Admin → Security → Single Sign-On**. CoreX supports:
+
+<Tabs>
+  <Tab title="SAML 2.0">
+    Compatible with Okta, Azure AD, Google Workspace, OneLogin, and any SAML 2.0 compliant IdP.
+
+    Configuration:
+    1. Download the CoreX SAML metadata XML from **Admin → Security → SSO → SAML Metadata**.
+    2. Create a SAML application in your IdP and upload the CoreX metadata.
+    3. Enter your IdP's metadata URL or XML into CoreX.
+    4. Map IdP user attributes to CoreX fields (email, first name, last name, role — optionally).
+    5. Test with a single user before enforcing SSO for all users.
+  </Tab>
+  <Tab title="OpenID Connect (OIDC)">
+    Compatible with Okta, Azure AD, Google Workspace, and any OIDC-compliant IdP.
+
+    Configuration:
+    1. Create an OIDC application in your IdP.
+    2. Enter the Client ID, Client Secret, and Discovery URL from your IdP into CoreX.
+    3. Set the redirect URI in your IdP to the CoreX callback URL (shown on the SSO settings page).
+    4. Test and activate.
+  </Tab>
+</Tabs>
+
+When SSO is enabled:
+- Users click "Sign in with [Your Company]" on the CoreX login page
+- They're redirected to your IdP for authentication
+- On success, they're redirected back to CoreX, authenticated
+
+You can enforce SSO (prevent password-based login) or run in hybrid mode (allow both SSO and password login during transition).
+
+### IP allowlisting
+
+Restrict CoreX access to specific IP addresses or ranges:
+
+Navigate to **Admin → Security → IP Allowlist**. Add your office IP addresses, VPN ranges, and any other approved networks. Users connecting from unlisted IPs will be blocked.
+
+<Warning>
+  Be careful when enabling IP allowlisting. If all Admin users are behind the same network and you add an incorrect IP, you could lock yourself out. Always test IP restrictions with a non-Admin user first, and keep a backup access path configured.
+</Warning>
+
+## Shift tracking
+
+CoreX tracks which users are clocked in for shift management and labor productivity reporting. Users clock in and out from **the shift clock** on their mobile terminal or desktop.
+
+Configure shift settings in **Admin → System Parameters → Shifts**:
+- Shift schedules (morning, afternoon, night)
+- Break deduction rules (automatic break deductions after N hours)
+- Overtime thresholds
+
+Shift data feeds the **Labor Productivity** and **Shift Summary** reports.

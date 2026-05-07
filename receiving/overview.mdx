@@ -1,0 +1,85 @@
+---
+title: "Receiving Overview"
+description: "How CoreX manages inbound freight — from dock appointments and PO management to scan-to-receive, QC, and putaway."
+icon: "truck"
+---
+
+The Receiving module covers everything that happens from the moment a truck pulls into your yard to the moment product is put away in a storage location and inventory is live. CoreX tracks every step with a full audit trail, giving you visibility into what arrived, what was inspected, what was accepted or rejected, and who handled it.
+
+## The inbound flow
+
+<Steps>
+  <Step title="Appointment scheduled">
+    Before a truck arrives, a dock appointment is booked through the **Dock Scheduler** or **Yard Calendar**. Appointments can be created by your team or — if you enable it — by suppliers directly through a supplier portal link.
+  </Step>
+  <Step title="Receiving order created">
+    A **Receiving Order (RO)** is the anchor document for an inbound shipment. It defines what account it belongs to, what supplier is shipping it, and what line items are expected. ROs can be created manually or imported from a Purchase Order (PO) or ASN.
+  </Step>
+  <Step title="Truck arrives and is checked in">
+    When the truck arrives, your team checks it in through the **Yard Calendar** or the dock door's terminal view. The RO is opened and a receiver begins the scan-to-receive workflow.
+  </Step>
+  <Step title="Scan to Receive">
+    The receiver scans each carton, pallet, or unit barcode. CoreX validates the scan against the RO's expected lines, captures quantities, and flags discrepancies (overages, shortages, unexpected SKUs) in real time.
+  </Step>
+  <Step title="QC Inspection">
+    If the account or item requires QC, CoreX prompts the receiver (or a dedicated QC inspector) to complete an inspection checklist. Items that fail QC can be quarantined, returned, or accepted with a note.
+  </Step>
+  <Step title="Putaway">
+    After receiving, CoreX assigns a putaway location to each SKU/lot based on your **Putaway Rules**. Staff scan to confirm putaway, and inventory goes live in the assigned location.
+  </Step>
+</Steps>
+
+## Key screens
+
+<CardGroup cols={2}>
+  <Card title="Receiving Orders" icon="clipboard-list" href="/receiving/receiving-orders">
+    View, create, and manage all inbound shipments. Filter by account, status, date, and dock.
+  </Card>
+  <Card title="Scan to Receive" icon="barcode" href="/receiving/scan-to-receive">
+    The mobile scan flow used by receivers on the dock to capture inbound product.
+  </Card>
+  <Card title="QC Inspections" icon="magnifying-glass" href="/receiving/qc-inspections">
+    Configure inspection checklists and review inspection results by account and item.
+  </Card>
+  <Card title="Appointments" icon="calendar" href="/receiving/appointments">
+    Schedule and manage dock appointments, yard slots, and truck check-ins.
+  </Card>
+</CardGroup>
+
+## Receiving order statuses
+
+| Status | Description |
+|--------|-------------|
+| **Draft** | Created but not yet confirmed. Line items may still be incomplete. |
+| **Scheduled** | A dock appointment has been booked for this RO. |
+| **In Progress** | Receiving has started — at least one scan has been recorded. |
+| **QC Hold** | One or more lines are pending QC inspection before putaway. |
+| **Partially Received** | Some lines are complete; others are still outstanding. |
+| **Received** | All expected lines have been received and confirmed. Putaway may still be in progress. |
+| **Closed** | Fully received and putaway complete. Inventory is live. |
+| **Cancelled** | RO was cancelled before receiving began. |
+
+## Discrepancy handling
+
+CoreX captures discrepancies automatically during the scan-to-receive process. A discrepancy is any difference between the expected quantity on an RO line and what was actually received. Common discrepancy types:
+
+- **Shortage** — fewer units received than expected
+- **Overage** — more units received than expected
+- **Unexpected SKU** — a barcode scanned that doesn't match any line on the RO
+- **Damage** — units flagged as damaged during receiving or QC
+
+Discrepancies are surfaced in the **Receiving Orders** list and can be exported for supplier claims. They also feed the **Supplier Scorecards** report in the Customers module.
+
+<Note>
+  You can configure per-account tolerance thresholds under **Admin → System Parameters**. For example, allow overages up to 5% without a discrepancy flag.
+</Note>
+
+## Cross-docking
+
+If an inbound shipment is destined to go right back out without being put into storage, CoreX supports **Cross-Dock** workflows. When a receiving order is flagged for cross-dock, inbound units are staged to an outbound dock location and linked directly to pending shipping orders. This minimizes handling and keeps freight moving.
+
+See **Receive → Cross-Dock** to manage cross-dock flows.
+
+## Proof of Delivery
+
+CoreX can capture and store **Proof of Delivery (POD)** documents — carrier BOLs, signed delivery receipts, or photos — attached directly to a receiving order. PODs are accessible from the RO detail page and from the shipper's Seller Portal.

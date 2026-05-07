@@ -1,0 +1,152 @@
+---
+title: "Channels"
+description: "Connect Shopify, Amazon, and other e-commerce channels to automatically import orders, sync inventory levels, and push tracking numbers back after shipment."
+icon: "store"
+---
+
+**Channels** are e-commerce storefronts and marketplaces connected to CoreX. When a channel is connected, orders flow automatically from the storefront into CoreX's fulfillment queue, inventory levels are synced back to the channel, and tracking numbers are pushed to the channel after shipment — keeping the end customer informed without any manual work.
+
+## How channel integrations work
+
+```
+Channel (Shopify, Amazon, etc.)
+    ↓  New orders imported automatically
+CoreX (receive → pick → pack → ship)
+    ↓  Tracking number sent back
+Channel marks order fulfilled
+    ↓  Customer gets shipping notification
+```
+
+Each channel is mapped to a specific **shipper account** in CoreX. When an order is placed on that channel, it's imported as a **Shipping Order** under the mapped account. When CoreX generates a tracking number, it's pushed back to the channel to mark the order as fulfilled.
+
+## Shopify
+
+Navigate to **Admin → Integration Store → Shopify** to connect a Shopify store.
+
+### Connecting Shopify
+
+1. Click **Connect Shopify**.
+2. Enter your **Shopify store domain** (e.g., `yourstore.myshopify.com`).
+3. Click **Connect** — CoreX opens an OAuth authorization flow in Shopify. Log in to Shopify and click **Install App**.
+4. You're returned to CoreX with the integration authenticated.
+5. Map the Shopify store to a shipper account.
+6. Configure sync settings (see below).
+7. Click **Activate**.
+
+### Shopify sync settings
+
+<AccordionGroup>
+  <Accordion title="Order import">
+    - **Import trigger** — import orders when they reach a specific Shopify status (e.g., "Payment captured" or "Unfulfilled")
+    - **Order filter** — optionally filter by fulfillment location, product tag, or SKU prefix
+    - **Import frequency** — near real-time (within 2 minutes via Shopify webhook) or scheduled (every 15 minutes)
+    - **Backfill** — import historical unfulfilled orders (useful when first connecting an active store)
+  </Accordion>
+  <Accordion title="SKU mapping">
+    CoreX maps Shopify variants to CoreX items by **SKU**. The Shopify variant's SKU field must match the CoreX item's SKU exactly. If Shopify SKUs don't match CoreX SKUs, use the **SKU Mapping** table to define equivalences:
+
+    | Shopify SKU | CoreX SKU |
+    |------------|-----------|
+    | shirt-black-L | TSHIRT-BLK-L |
+    | shirt-black-XL | TSHIRT-BLK-XL |
+  </Accordion>
+  <Accordion title="Inventory sync">
+    - **Sync inventory levels back to Shopify** — CoreX pushes available inventory counts to Shopify on a configurable schedule (every 15 minutes, hourly, or daily)
+    - **Buffer** — optionally hold back a buffer quantity from Shopify (e.g., report 10 fewer than available to prevent overselling)
+    - **Out-of-stock behavior** — set item to "Continue selling" or "Stop selling" in Shopify when CoreX available quantity reaches 0
+  </Accordion>
+  <Accordion title="Fulfillment confirmation">
+    - When CoreX generates a tracking number, automatically mark the Shopify order as **fulfilled** and add the tracking number
+    - Send **Shopify fulfillment notification** email to the customer (uses Shopify's native notification)
+    - For multi-package shipments, CoreX sends one fulfillment notification per carton
+  </Accordion>
+</AccordionGroup>
+
+### Multiple Shopify stores
+
+You can connect multiple Shopify stores to CoreX — each store is a separate integration mapped to a separate shipper account (or the same account with different channel tags). There's no limit on the number of connected stores.
+
+## Amazon
+
+CoreX integrates with both **Amazon Seller Central** (FBM — Fulfilled by Merchant) and **Amazon Vendor Central** (wholesale/EDI).
+
+### Amazon Seller Central (FBM)
+
+1. Navigate to **Admin → Integration Store → Amazon Seller Central**.
+2. Click **Connect Amazon**.
+3. Select your Amazon marketplace region (US, EU, etc.).
+4. Authenticate via Amazon's SP-API OAuth flow.
+5. Map to a shipper account and configure sync settings.
+
+**Key Amazon FBM considerations:**
+
+- Amazon requires shipping confirmation within a specific window (often 24 hours). CoreX monitors pending Amazon orders and alerts you if any are at risk of missing the confirmation deadline.
+- Amazon orders often have carrier and service level requirements defined in the order (e.g., "UPS Next Day Air"). CoreX's carrier rules can automatically route Amazon orders to the required carrier.
+- **Amazon Buy Shipping** — optionally use Amazon's pre-negotiated shipping rates by purchasing labels through the Amazon Buy Shipping API instead of your own carrier accounts. Toggle this option in the integration settings.
+
+### Amazon Vendor Central
+
+Amazon Vendor Central (AVC) uses EDI rather than the SP-API. Connect AVC trading partner relationships through **Admin → EDI Processing → Trading Partners**. See [EDI](/integrations/edi) for setup details.
+
+### Amazon inventory sync
+
+CoreX syncs available inventory to Amazon Seller Central's **Merchant Fulfilled Network (MFN)** listing quantity. Configure:
+- Sync frequency
+- Buffer quantity
+- Which ASINs/SKUs to include in the sync
+
+<Warning>
+  Be careful with Amazon inventory accuracy. Overselling on Amazon triggers order cancellations and can affect your seller performance metrics. Use inventory buffers conservatively and monitor sync status in **Admin → Integration Store → Amazon → Health**.
+</Warning>
+
+## WooCommerce
+
+1. Navigate to **Admin → Integration Store → WooCommerce**.
+2. Enter your WooCommerce store URL.
+3. Generate a REST API key in **WooCommerce → Settings → Advanced → REST API** and paste it into CoreX.
+4. Map to an account and configure sync settings.
+
+WooCommerce integration supports order import, inventory sync, and fulfillment confirmation — same as Shopify.
+
+## BigCommerce
+
+1. Navigate to **Admin → Integration Store → BigCommerce**.
+2. Generate a BigCommerce API key in **BigCommerce → Advanced Settings → API Accounts**.
+3. Paste the credentials into CoreX.
+4. Map to an account and activate.
+
+## Custom channels via API
+
+For storefronts or order management systems not in the Integration Store, use the [CoreX REST API](/integrations/api) to push orders directly into CoreX. Your system calls:
+
+```http
+POST /v1/shipping-orders
+```
+
+with the order data. This works for any system that can make HTTP requests — custom e-commerce platforms, ERPs, subscription billing systems, or any OMS.
+
+Combine with [Webhooks](/integrations/webhooks) to receive fulfillment confirmations back to your system when orders ship.
+
+## Channel health monitoring
+
+Navigate to **Admin → Integration Store** to monitor the health of all connected channels:
+
+| Indicator | Description |
+|-----------|-------------|
+| Green | Integration is active and syncing normally |
+| Yellow | Minor issue — some orders failing, inventory sync delayed |
+| Red | Critical issue — integration is down or authentication has expired |
+
+Click any channel to see:
+- Last successful sync time
+- Orders imported in the last 24 hours
+- Errors and failed order imports
+- Inventory sync status and last push time
+
+Set up alerts in **Admin → System Parameters → Notifications** to be notified by email when a channel goes to Yellow or Red status.
+
+## Managing channel-specific SKUs
+
+Products often have different identifiers across channels (Shopify variant IDs, Amazon ASINs, your internal SKUs). Use the **Channel SKU Mapping** table (**Admin → Channels → SKU Mapping**) to define how each channel's identifiers map to CoreX item SKUs.
+
+CoreX looks up the mapping when importing an order and converts channel-specific identifiers to the canonical CoreX SKU for that account. This means your internal SKU structure stays clean regardless of how channels identify your products.

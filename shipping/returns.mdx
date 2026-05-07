@@ -1,0 +1,132 @@
+---
+title: "Returns & RMA"
+description: "Process customer returns and RMAs. Receive returned goods, run return QC, and disposition units back to stock, to quarantine, or to disposal."
+icon: "rotate-left"
+---
+
+CoreX handles inbound returns through a dedicated **Returns / RMA** workflow that's separate from standard receiving. Returns need special handling: they may require inspection, disposition decisions, restocking, quarantine, or supplier credit creation. CoreX tracks every step and keeps your inventory accurate throughout.
+
+## Return types
+
+CoreX supports several return scenarios:
+
+- **Customer return (B2C)** — an end customer returns a product they ordered. Common in e-commerce fulfillment.
+- **Retailer return / chargeback (B2B)** — a retailer or wholesale customer returns goods, often in bulk.
+- **Refused delivery** — a carrier returns a package that was refused at the door or couldn't be delivered.
+- **Carrier damage return** — the carrier returns a damaged package.
+- **Supplier return** — product being sent back to the supplier for credit or replacement.
+
+## Creating an RMA
+
+Navigate to **Ship → Returns / RMA** and click **New RMA**.
+
+Fill in:
+- **Account** — the shipper account the return belongs to
+- **Original order number** — optionally link to the original shipping order (enables auto-populating the return line items)
+- **Customer name and address** — who is sending the return back
+- **Return reason** — from your configured list of return reasons (defective, wrong item, no longer needed, etc.)
+- **Expected items** — the SKUs and quantities expected to come back
+- **Return label** — optionally generate a prepaid return label to send to the customer
+
+The RMA is assigned an **RMA number** that the customer includes with their return. CoreX can also generate a printed or emailed RMA document.
+
+## Return label generation
+
+From an open RMA, click **Generate Return Label** to create a prepaid return shipping label:
+
+- Select the carrier and service level for the return shipment.
+- CoreX generates the label and attaches it to the RMA.
+- The label can be emailed to the customer, downloaded as PDF, or printed.
+- The label cost is captured as a billable event against the account's rate card (if configured).
+
+## Receiving a return
+
+When the returned package arrives at your warehouse:
+
+1. Go to **Ship → Returns / RMA** and find the RMA by RMA number or customer name.
+2. Click **Start Return Receiving**.
+3. Scan the items in the return. CoreX matches scans to the RMA's expected line items.
+4. Note the condition of each unit as it's received:
+   - **Sellable** — in original condition, can go back to available inventory
+   - **Damaged** — needs inspection or disposition
+   - **Defective** — does not function; needs further evaluation
+   - **Unsellable** — beyond repair or resale
+
+5. After scanning all items, submit the receipt. The RMA moves to **QC / Disposition** status.
+
+<Note>
+  If a return arrives without an RMA (unexpected return), you can create an ad-hoc return receipt from the receiving screen and create the RMA retroactively.
+</Note>
+
+## Return QC
+
+If the account has return QC configured, each returned line goes through an inspection checklist (see [QC Inspections](/receiving/qc-inspections)). Return QC checklists typically check:
+
+- Packaging condition
+- Product functionality
+- All components/accessories present
+- Resale readiness
+
+QC results are recorded on the RMA and drive the disposition decision.
+
+## Disposition
+
+After receiving and QC, each returned unit needs a **disposition decision**:
+
+<Tabs>
+  <Tab title="Restock">
+    The unit is in sellable condition and can go back into available inventory. CoreX creates an inventory receipt and adds the units to the account's stock at the designated location.
+
+    If the unit came back in its original packaging and passes QC, this is usually the right disposition. Restocking triggers a **billable restocking event** if configured in the rate card.
+  </Tab>
+  <Tab title="Quarantine">
+    The unit needs further review before a final disposition can be made. Move it to a quarantine location. A supervisor or QC team member will make the final call later.
+  </Tab>
+  <Tab title="Rework / Refurbish">
+    The unit needs work before it can be resold — repackaging, relabeling, cleaning, or repair. Create a **Work Order** from the disposition screen. Once the work order is complete, the unit can be restocked or re-evaluated.
+  </Tab>
+  <Tab title="Return to Vendor">
+    The unit should be returned to the original supplier or manufacturer. CoreX creates an outbound RMA/return shipment to the vendor. The inventory remains in a hold status until the vendor confirms receipt.
+  </Tab>
+  <Tab title="Dispose / Write Off">
+    The unit has no resale or return value and should be discarded. CoreX removes the units from inventory with a write-off transaction. The write-off is recorded for accounting and tax purposes.
+  </Tab>
+</Tabs>
+
+## RMA statuses
+
+| Status | Description |
+|--------|-------------|
+| **Open** | RMA created, waiting for return to arrive |
+| **Label Sent** | Return label sent to customer |
+| **In Transit** | Carrier tracking shows the return package is on its way |
+| **Received** | Return has been physically received and scanned |
+| **QC Hold** | Awaiting QC inspection |
+| **Awaiting Disposition** | QC complete; disposition decision needed |
+| **Restocked** | All units restocked to inventory |
+| **Closed** | RMA fully processed and closed |
+| **Cancelled** | RMA cancelled (e.g., customer kept the item) |
+
+## Billing returns
+
+Returns generate several types of billable events depending on your rate card configuration:
+
+- **Return receiving fee** — per RMA or per unit received
+- **Return label cost** — pass-through or markup on the carrier label
+- **Return QC fee** — per unit inspected
+- **Restocking fee** — per unit or per RMA restocked
+- **Disposal fee** — per unit disposed
+
+All billable events from return processing are captured automatically and appear in the account's billing dashboard alongside regular fulfillment charges.
+
+## Return analytics
+
+Track return performance from **Reports → Report Generator** with return-specific reports:
+
+- Return rate by account, SKU, and channel
+- Return reasons distribution
+- Average return processing time (received to restocked)
+- Disposition outcomes by account
+- Return costs vs. recovered inventory value
+
+High return rates on specific SKUs can indicate product quality issues, description mismatches on the channel listing, or packaging problems — and are worth flagging to your shipper account manager.
